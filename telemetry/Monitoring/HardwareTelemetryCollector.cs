@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using LibreHardwareMonitor.Hardware;
+using LibreHardwareMonitor.Hardware.Storage;
 using QuietSystem.Telemetry.Models;
 
 namespace QuietSystem.Telemetry.Monitoring;
@@ -48,7 +49,7 @@ public sealed class HardwareTelemetryCollector : IDisposable
             ReadCpu(hardware.FirstOrDefault(item => item.HardwareType == HardwareType.Cpu)),
             ReadGpu(hardware.FirstOrDefault(item => item.HardwareType is HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel)),
             ReadMemory(hardware.FirstOrDefault(item => item.HardwareType == HardwareType.Memory)),
-            ReadStorage(hardware.FirstOrDefault(item => item.HardwareType == HardwareType.Storage)),
+            ReadStorage(hardware.OfType<StorageDevice>()),
             _network.Sample());
     }
 
@@ -105,19 +106,23 @@ public sealed class HardwareTelemetryCollector : IDisposable
         return new MemoryTelemetry(used, total, Exact(sensors, SensorType.Load, "Memory"));
     }
 
-    private static StorageTelemetry? ReadStorage(IHardware? hardware)
+    private static StorageTelemetry? ReadStorage(IEnumerable<StorageDevice> disks)
     {
-        var drive = DriveInfo.GetDrives().FirstOrDefault(item => item.IsReady && item.Name.Equals(Path.GetPathRoot(Environment.SystemDirectory), StringComparison.OrdinalIgnoreCase));
-        if (hardware is null && drive is null) return null;
-        double? total = drive?.TotalSize / 1_073_741_824d;
-        double? used = drive is null ? null : (drive.TotalSize - drive.AvailableFreeSpace) / 1_073_741_824d;
+        var systemRoot = Path.GetPathRoot(Environment.SystemDirectory);
+        var drive = DriveInfo.GetDrives().FirstOrDefault(item => item.IsReady && item.Name.Equals(systemRoot, StringComparison.OrdinalIgnoreCase));
+        if (drive is null) return null;
+        // Disk enumeration order is unrelated to the volume containing Windows.
+        var hardware = StorageSelection.SystemDrive(disks, systemRoot,
+            disk => disk.Storage.Partitions.Select(partition => partition.DriveLetter));
+        double? total = drive.TotalSize / 1_073_741_824d;
+        double? used = (drive.TotalSize - drive.AvailableFreeSpace) / 1_073_741_824d;
         double? usage = total > 0 ? used / total * 100 : null;
         var sensors = hardware?.Sensors ?? Array.Empty<ISensor>();
         return new StorageTelemetry(
             hardware?.Name ?? drive?.Name,
             used,
             total,
-            usage ?? Preferred(sensors, SensorType.Load, "Used Space", "Total Activity"),
+            usage,
             ThroughputInMegabytes(sensors, "Read"),
             ThroughputInMegabytes(sensors, "Write"),
             Preferred(sensors, SensorType.Temperature, "Temperature", "Drive"));

@@ -10,7 +10,13 @@ if (-not (Test-Path -LiteralPath $dotnetPath)) {
 }
 
 & $dotnetPath restore $projectPath -r win-x64 --configfile $nugetConfig
+if ($LASTEXITCODE -ne 0) {
+    throw "Dependency restore failed with exit code $LASTEXITCODE. Publishing stopped."
+}
 & $dotnetPath publish $projectPath -c Release -r win-x64 --self-contained false --no-restore -o $outputPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Publishing failed with exit code $LASTEXITCODE. Wallpaper files were not copied."
+}
 $wallpaperOutput = Join-Path $outputPath 'wallpaper'
 New-Item -ItemType Directory -Path $wallpaperOutput -Force | Out-Null
 Copy-Item -Path (Join-Path $PSScriptRoot '..\wallpaper\*') -Destination $wallpaperOutput -Recurse -Force

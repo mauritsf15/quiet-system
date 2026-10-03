@@ -22,6 +22,8 @@ The command pane and live dashboard can also be opened in a normal browser at th
 
 The **settings** button changes accent color, interface scale, and weather/storage visibility. Changes are saved in that browser's local storage and synchronize between windows sharing that storage. Separate Wallpaper Engine storage profiles retain their own settings.
 
+Storage details describe the volume containing Windows; physical disk readings are shown only when that volume maps to one known disk. The audio visualizer follows the default output and reconnects after device changes or capture failures.
+
 Playing Spotify takes priority over YouTube and other local media players. Pausing Spotify lets another playing player take over; resuming Spotify restores its priority. When nothing is playing, paused Spotify takes priority over other paused players. This supports Spotify's Windows desktop and Microsoft Store installations.
 
 When a song has timed lyrics, its current line and upcoming line appear beneath the artist. The space is reserved so lyric changes do not move the dashboard. Pausing freezes the lyrics; seeking updates them directly. Missing lyrics, videos, and unavailable timing leave the area empty. Long lines end with an ellipsis, and reduced-motion preferences disable lyric animation. Lyrics come from LRCLIB, so recording versions, coverage, and timing can differ from Spotify's own lyrics.
@@ -40,6 +42,10 @@ Run `npm test` for the JavaScript checks and `npm run preview` for a browser pre
 
 Run `npm run test:media` for session-priority, Windows timeline, lyric parsing, provider matching/cache/cooldown, and asynchronous track-switch checks. These checks use local fixtures and make no external requests.
 
+Run `npm run test:audio` for audio-device recovery fixtures and `npm run test:storage` for system-disk selection fixtures. Audio tests also accept `-- --device-check` to check native capture initialization on the current output device.
+
 Run `npm run test:terminal` on Windows for interactive console checks. The xterm.js renderer and fit addon are bundled locally with their MIT licenses; after changing their pinned npm versions, run `npm run vendor:terminal` to refresh the assets.
 
 For browser layout checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs` and run `node tools/check-display-layout.mjs` and `node tools/check-lyrics-layout.mjs`. They use local fixtures without external requests and save screenshots under `artifacts/`.
+
+When updating an existing installation, wait for commands to finish, stop the companion, run `./telemetry/publish.ps1`, restart the companion, and refresh the wallpaper. Publishing stops with an error if dependency restore or the build fails.
