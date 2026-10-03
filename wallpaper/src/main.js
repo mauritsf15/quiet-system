@@ -3,12 +3,12 @@ import { initialState } from "./core/state.js";
 import { createHistory } from "./core/history.js";
 import { startTelemetryClient } from "./core/telemetry-client.js";
 import { startDemoTelemetry } from "./core/demo-telemetry.js";
-import { startWeatherService } from "./core/weather-service.js";
+import { startWeatherService } from "./core/weather-service.js?v=0.1.1";
 import { installMediaIntegration } from "./media/media-controller.js";
 import { renderResources } from "./components/resources.js?v=20261002a";
-import { installDashboard } from "./components/dashboard.js?v=20261003d";
+import { installDashboard } from "./components/dashboard.js?v=20261004a";
 import { installCommandTerminal } from "./components/command-terminal.js?v=20261003d";
-import { installAppearance } from "./components/appearance.js?v=20261003d";
+import { installAppearance } from "./components/appearance.js?v=0.1.1";
 import { displayRole, startDisplayRuntime } from "./core/display-runtime.js";
 
 const store = createStore(initialState);

@@ -5,7 +5,7 @@ const lines = [
   "loading 60-second history ............ ok",
   "registering media session ............ ok",
   "calibrating audio field .............. ok",
-  "weather / Wassenaar .................. queued",
+  "weather / local forecast ............ queued",
   "",
   "> system ready",
 ];

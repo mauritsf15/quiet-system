@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="dark" />
     <title>Quiet System</title>
     <link rel="stylesheet" href="./vendor/xterm/xterm.css" />
-    <link rel="stylesheet" href="./styles/dashboard.css?v=20261003d" />
+    <link rel="stylesheet" href="./styles/dashboard.css?v=0.1.1" />
   </head>
   <body>
     <main class="app">
@@ -16,7 +16,7 @@
           <button id="settings-button" class="icon-button" type="button" aria-label="Open appearance settings">settings</button>
         </header>
         <section class="overview">
-          <div><p id="clock-weekday" class="eyebrow">TUESDAY · WASSENAAR</p><div id="clock-time" class="clock-time">--:--<small>--</small></div><p id="clock-date" class="overview-date">--</p></div>
+          <div><p id="clock-weekday" class="eyebrow">LOCAL TIME</p><div id="clock-time" class="clock-time">--:--<small>--</small></div><p id="clock-date" class="overview-date">--</p></div>
           <div class="overview-status"><span class="live-dot"></span><span id="connection-label">CONNECTING</span><small id="system-line">Windows · uptime --</small><small id="weather-line">Weather / acquiring</small></div>
         </section>
         <div class="section-title system-heading">
@@ -50,7 +50,10 @@
             <div class="media-times"><span id="media-position">--:--</span><span id="media-duration">--:--</span></div>
           </div>
         </section>
-        <div id="audio-spectrum" class="audio-spectrum" aria-label="Live audio visualizer"></div>
+        <div class="audio-spectrum-panel">
+          <div id="audio-spectrum" class="audio-spectrum" role="img" aria-label="Live system audio: 48 fixed frequency bands from 35 Hz to 16 kHz, bass to treble"></div>
+          <div class="audio-spectrum-axis" aria-hidden="true"><span>35 Hz · bass</span><span>midrange</span><span>treble · 16 kHz</span></div>
+        </div>
       </section>
       <section class="command-panel" aria-label="PowerShell command panel">
         <div id="terminal-view" class="panel-view is-active">
@@ -62,10 +65,23 @@
         </div>
       </section>
     </main>
-    <dialog id="settings-dialog" class="settings-dialog"><form method="dialog"><div class="settings-head"><div><p class="eyebrow">SETTINGS</p><h2>Appearance</h2></div><button type="submit" aria-label="Close settings">✕</button></div><label>Accent color <input id="setting-accent" type="color" value="#83adbf" /></label><label>Interface scale <input id="setting-scale" type="range" min="0.85" max="1.15" step="0.01" value="1" /></label><label class="setting-check"><input id="setting-weather" type="checkbox" checked /> Show weather</label><label class="setting-check"><input id="setting-storage" type="checkbox" checked /> Show storage</label><p class="settings-note">Saved on this computer.</p></form></dialog>
+    <dialog id="settings-dialog" class="settings-dialog"><form method="dialog">
+      <div class="settings-head"><div><p class="eyebrow">SETTINGS</p><h2>Appearance & weather</h2></div><button type="submit" aria-label="Close settings">✕</button></div>
+      <label>Accent color <input id="setting-accent" type="color" value="#83adbf" /></label>
+      <label>Interface scale <input id="setting-scale" type="range" min="0.85" max="1.15" step="0.01" value="1" /></label>
+      <label class="setting-check"><input id="setting-weather" type="checkbox" checked /> Show weather</label>
+      <label for="setting-city">Weather location</label>
+      <div class="location-search"><input id="setting-city" type="search" placeholder="City or postal code" maxlength="120" /><button id="location-search" type="button">Search</button></div>
+      <select id="location-results" aria-label="Matching locations" hidden></select>
+      <button id="location-detect" class="location-detect" type="button">Use my location</button>
+      <p id="location-status" class="settings-note" role="status">Choose a city to enable local weather.</p>
+      <label class="setting-check"><input id="setting-storage" type="checkbox" checked /> Show storage</label>
+      <p class="settings-note">Saved on this computer. Location detection is optional; city search works when it is unavailable.</p>
+      <p class="settings-note">Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>. Location search data by <a href="https://www.geonames.org/" target="_blank" rel="noreferrer">GeoNames</a>.</p>
+    </form></dialog>
     <div id="demo-badge" class="demo-badge">BROWSER PREVIEW · SIMULATED DATA</div>
     <script src="./vendor/xterm/xterm.js"></script>
     <script src="./vendor/xterm/addon-fit.js"></script>
-    <script type="module" src="./src/main.js?v=20261003d"></script>
+    <script type="module" src="./src/main.js?v=0.1.1"></script>
   </body>
 </html>

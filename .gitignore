@@ -18,3 +18,9 @@ tests/Storage.Integration/obj/
 artifacts/
 *.user
 *.suo
+*.log
+*.mdmp
+*.dmp
+.env
+.env.*
+!.env.example

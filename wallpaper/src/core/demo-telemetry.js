@@ -9,8 +9,8 @@ export function startDemoTelemetry(store, onTelemetry) {
     const telemetry = {
       timestamp: Date.now(),
       system: {
-        username: "maurits",
-        hostname: "MAURITS-VICTUS",
+        username: "demo-user",
+        hostname: "DEMO-PC",
         os: "Windows 11 · 25H2",
         uptimeSeconds: (Date.now() - startedAt) / 1000 + 180_000,
       },

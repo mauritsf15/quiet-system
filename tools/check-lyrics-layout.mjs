@@ -92,7 +92,14 @@ try {
       await page.evaluate(() => window.__mediaFixture.lyrics());
       await page.waitForTimeout(320);
       const after = await geometry(page);
-      assert.deepEqual(after, before, `${name} ${scale}: lyrics must not move dashboard content or add scrolling`);
+      // Subtracting an animated transform can leave floating-point residue.
+      for (const element of ["clock", "resources", "media", "art", "lyrics", "progress", "audio"]) {
+        for (const coordinate of ["x", "y", "width", "height", "bottom"]) {
+          assert.ok(Math.abs(after[element][coordinate] - before[element][coordinate]) < 0.01,
+            `${name} ${scale}: lyrics must not move ${element}.${coordinate}`);
+        }
+      }
+      assert.equal(after.scrollHeight, before.scrollHeight, `${name} ${scale}: lyrics must not add scrolling`);
       {
         assert.equal(await page.locator(".lyric-pair.is-active .lyric-current").textContent(), "A quiet signal moves across the room");
         assert.ok(after.lyrics.y >= after.media.y && after.lyrics.bottom <= after.media.bottom, `${name}: lyrics fit in panel`);

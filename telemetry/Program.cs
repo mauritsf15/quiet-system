@@ -9,6 +9,20 @@ using QuietSystem.Telemetry.Monitoring;
 using QuietSystem.Telemetry.Networking;
 using QuietSystem.Telemetry.Services;
 
+// Verify the packaged runtime without starting services or opening terminal sessions.
+if (args.Contains("--check-installation", StringComparer.Ordinal))
+{
+    var wallpaperAvailable = File.Exists(Path.Combine(AppContext.BaseDirectory, "wallpaper", "index.html"));
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new
+    {
+        runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+        architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
+        wallpaperAvailable
+    }));
+    Environment.ExitCode = wallpaperAvailable ? 0 : 1;
+    return;
+}
+
 using var instanceMutex = new Mutex(true, @"Local\QuietSystem.Telemetry", out var isFirstInstance);
 if (!isFirstInstance) return;
 
@@ -34,6 +48,7 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<AudioS
 
 var app = builder.Build();
 app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(20) });
+WeatherProxy.MapEndpoints(app);
 // Keep Wallpaper Engine's embedded browser from mixing old UI code with a new companion.
 app.Use(async (context, next) =>
 {

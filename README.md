@@ -6,7 +6,7 @@ A Wallpaper Engine dashboard for system stats, music, lyrics, weather, and audio
 
 **You need:** Wallpaper Engine and an x64 PC with Windows 10 (version 2004 or newer) or Windows 11. The download includes the .NET runtime; no developer tools are needed.
 
-1. **Download** `Quiet-System-0.1.0-win-x64.zip` from the [Releases page](https://github.com/mauritsf15/wallpaper/releases). Choose the release ZIP, not the source code ZIP.
+1. **Download** `Quiet-System-0.1.1-win-x64.zip` from the [Releases page](https://github.com/mauritsf15/quiet-system/releases). Choose the release ZIP, not the source code ZIP.
 2. **Extract** it into a permanent folder, such as Documents. Keep the app and `wallpaper` folder together.
 3. **Run** **Install Quiet System.cmd**. Follow the prompts to start the background app and optionally enable startup with Windows. No administrator access is needed.
 4. **Add the wallpaper:** in Wallpaper Engine, choose **Open Wallpaper → Open from URL** and paste:
@@ -106,7 +106,7 @@ External services also see your IP address. **Use my location** requests your lo
 | Location detection fails | Search for your city instead. Weather needs internet access. |
 | Missing music or audio | Start playback and check the default Windows output device. |
 | Missing lyrics | The provider may not have a match for that track. |
-| Old interface or strange codes like `[?25h` | Add `?v=0.1.0` to the URL, or `&v=0.1.0` if it already contains `?`. Use a new value for later updates. |
+| Old interface or strange codes like `[?25h` | Add `?v=0.1.1` to the URL, or `&v=0.1.1` if it already contains `?`. Use a new value for later updates. |
 
 ## Development
 
@@ -126,7 +126,7 @@ Builds include the runtime. Add `-FrameworkDependent` for a smaller build that r
 | `npm run test:audio` | Audio analysis and device recovery checks. |
 | `npm run test:storage` | System disk selection checks. |
 | `npm run test:terminal` | Interactive console checks on Windows. |
-| `./tools/package-release.ps1 -Version 0.1.0` | Create a release ZIP and SHA256 checksum in `artifacts/releases/`. |
+| `./tools/package-release.ps1 -Version 0.1.1` | Create a release ZIP and SHA256 checksum in `artifacts/releases/`. |
 
 Use the app's local URL for live commands, media, and audio. Add `-- -- --device-check` to the audio test command to check your current output device.
 

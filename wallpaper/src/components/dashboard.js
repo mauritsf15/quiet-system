@@ -1,5 +1,6 @@
 import { duration, uptime } from "../core/format.js";
 import { installLyrics } from "../media/lyrics-controller.js?v=20261003c";
+import { createSpectrumRenderer } from "../audio/spectrum-renderer.js?v=20261004a";
 
 const el = (id) => document.getElementById(id);
 let lastArtwork = null;
@@ -9,7 +10,8 @@ function renderClock(store) {
   const parts = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: store.getState().settings.clock24Hour ? "h23" : "h12" }).formatToParts(now);
   const part = (name) => parts.find((entry) => entry.type === name)?.value || "--";
   el("clock-time").innerHTML = `${part("hour")}:${part("minute")}<small>${part("second")}</small>`;
-  el("clock-weekday").textContent = `${new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(now).toUpperCase()} · WASSENAAR`;
+  const place = store.getState().settings.weatherLocation?.name;
+  el("clock-weekday").textContent = new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(now).toUpperCase() + (place ? ` · ${place.toUpperCase()}` : "");
   el("clock-date").textContent = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "long", year: "numeric" }).format(now);
 }
 
@@ -19,7 +21,7 @@ function renderState(state) {
   el("system-line").textContent = `${identity.os} · ${uptime(identity.uptimeSeconds)}`;
   el("connection-label").textContent = connectionState.toUpperCase();
   el("status-message").textContent = connected ? "All systems reporting" : "Waiting for live data";
-  el("weather-line").textContent = weather.available ? `Wassenaar · ${Math.round(weather.temperatureC)}°C · ${weather.condition}` : `Weather / ${weather.condition}`;
+  el("weather-line").textContent = weather.available ? `${state.settings.weatherLocation?.name || "Weather"} · ${Math.round(weather.temperatureC)}°C · ${weather.condition}` : `Weather / ${weather.condition}`;
   el("weather-line").hidden = !state.settings.showWeather;
 
   const playing = media.enabled && (media.state === "playing" || media.state === "paused");
@@ -44,21 +46,13 @@ function renderState(state) {
   }
 }
 
-function updateAudio(bars, levels, available = true) {
-  for (let index = 0; index < bars.length; index += 1) {
-    const level = Math.max(0, Math.min(1, Number(levels[index]) || 0));
-    bars[index].style.height = `${Math.max(4, level * 100)}%`;
-    bars[index].style.opacity = String(0.32 + level * 0.68);
-  }
-  el("audio-label").textContent = !available ? "audio unavailable" : levels.some((value) => value > 0.04) ? "audio / live" : "system audio";
+function updateAudio(spectrum, levels, available = true) {
+  const active = spectrum.update(levels, available);
+  el("audio-label").textContent = !available ? "audio unavailable" : active ? "audio / live" : "system audio";
 }
 
 export function installDashboard(store, { localCompanion }) {
-  const bars = Array.from({ length: 48 }, () => {
-    const bar = document.createElement("i");
-    el("audio-spectrum").appendChild(bar);
-    return bar;
-  });
+  const spectrum = createSpectrumRenderer(el("audio-spectrum"));
   let liveSocket;
   let retryTimer;
   let stopped = false;
@@ -75,11 +69,11 @@ export function installDashboard(store, { localCompanion }) {
         const packet = JSON.parse(event.data);
         if (packet.type === "media") store.update((state) => ({ ...state, media: { ...state.media, ...packet.data } }));
         if (packet.type === "lyrics") lyrics.receive(packet.data);
-        if (packet.type === "audio") updateAudio(bars, packet.levels || [], packet.available);
+        if (packet.type === "audio") updateAudio(spectrum, packet.levels || [], packet.available);
       } catch { /* Ignore malformed live packets. */ }
     });
     liveSocket.addEventListener("close", () => {
-      updateAudio(bars, [], false);
+      updateAudio(spectrum, [], false);
       lyrics.disconnect();
       store.update((state) => ({ ...state, media: { ...state.media, enabled: false, state: "stopped" } }));
       if (!stopped) retryTimer = window.setTimeout(connectLive, 2500);
@@ -87,6 +81,6 @@ export function installDashboard(store, { localCompanion }) {
     liveSocket.addEventListener("error", () => liveSocket.close());
   }
   if (localCompanion) connectLive();
-  else updateAudio(bars, [], false);
-  return () => { stopped = true; unsubscribe(); lyrics.dispose(); window.clearInterval(clockTimer); window.clearInterval(retryTimer); liveSocket?.close(); };
+  else updateAudio(spectrum, [], false);
+  return () => { stopped = true; unsubscribe(); lyrics.dispose(); spectrum.dispose(); window.clearInterval(clockTimer); window.clearTimeout(retryTimer); liveSocket?.close(); };
 }

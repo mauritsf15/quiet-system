@@ -47,7 +47,7 @@ function appearanceHarness(t, saved = null) {
 test("appearance repairs malformed saved preferences before applying or displaying them", (t) => {
   const app = appearanceHarness(t, JSON.stringify({ accent: "red", scale: "large", weather: "false", storage: null }));
   installAppearance(app.store);
-  assert.deepEqual(app.saved(), { accent: "#83adbf", scale: 1, weather: true, storage: true });
+  assert.deepEqual(app.saved(), { accent: "#83adbf", scale: 1, weather: true, storage: true, location: null });
   assert.equal(app.controls["setting-accent"].value, "#83adbf");
   assert.equal(app.controls["setting-scale"].value, "1");
   assert.equal(app.properties.get("--scale"), "1");
@@ -98,4 +98,17 @@ test("appearance remains usable when browser storage is disabled", (t) => {
   app.controls["setting-weather"].checked = false;
   assert.doesNotThrow(() => app.controls["setting-weather"].dispatchEvent(new Event("input")));
   assert.equal(app.store.getState().settings.showWeather, false);
+});
+
+test("weather location restores locally and synchronizes across windows without a default city", (t) => {
+  const app = appearanceHarness(t, JSON.stringify({ location: { name: "Berlin", latitude: 52.52, longitude: 13.405 } }));
+  const dispose = installAppearance(app.store);
+  assert.equal(app.store.getState().settings.weatherLocation.name, "Berlin");
+  const writes = app.writes();
+  app.storageEvent(JSON.stringify({ location: { name: "London", latitude: 51.507, longitude: -0.128 } }));
+  assert.equal(app.store.getState().settings.weatherLocation.name, "London");
+  assert.equal(app.writes(), writes);
+  app.storageEvent(null, null);
+  assert.equal(app.store.getState().settings.weatherLocation, null);
+  dispose();
 });

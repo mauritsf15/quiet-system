@@ -49,6 +49,7 @@ export const initialState = {
     bootSequence: true,
     showMedia: true,
     showWeather: true,
+    weatherLocation: null,
     showStorage: true,
     showClock: true,
     clock24Hour: true,

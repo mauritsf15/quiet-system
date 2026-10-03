@@ -26,9 +26,10 @@ function updateClock(state) {
   element["clock-date"].textContent = date;
 
   const weather = state.weather;
+  const place = state.settings.weatherLocation?.name?.toUpperCase() || "WEATHER";
   const weatherText = weather.available
-    ? `WASSENAAR · ${temperature(weather.temperatureC, state.settings.temperatureUnit)} · ${weather.condition.toUpperCase()}`
-    : `WASSENAAR · ${weather.condition.toUpperCase()}`;
+    ? `${place} · ${temperature(weather.temperatureC, state.settings.temperatureUnit)} · ${weather.condition.toUpperCase()}`
+    : `${place} · ${weather.condition.toUpperCase()}`;
   element["clock-weather"].textContent = weatherText;
   element["weather-line"].textContent = `weather / ${weatherText.toLowerCase()}`;
   element["clock-weather"].hidden = !state.settings.showWeather;

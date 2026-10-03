@@ -9,7 +9,7 @@ const prompt = document.querySelector(".prompt");
 export function renderIdentity(state) {
   const { identity, connectionState, connected } = state;
   shellIdentity.textContent = `${identity.username}@${identity.hostname}:~$ status`;
-  systemLine.textContent = `${identity.os} · ${uptime(identity.uptimeSeconds)} · Wassenaar`;
+  systemLine.textContent = `${identity.os} · ${uptime(identity.uptimeSeconds)}`;
   prompt.firstChild.textContent = `${identity.username}@${identity.hostname}:~$ `;
   connectionLabel.textContent = `LINK / ${connectionState.toUpperCase()}`;
   statusMessage.textContent = connected
