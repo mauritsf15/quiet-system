@@ -17,6 +17,40 @@ export function installCommandTerminal({ localCompanion }) {
   let historyIndex = 0;
   const entries = new Map();
 
+  function terminalAppearance() {
+    const style = getComputedStyle(document.body);
+    return {
+      fontFamily: style.fontFamily,
+      fontSize: parseFloat(style.fontSize),
+      theme: { background: style.getPropertyValue("--bg").trim(), foreground: style.getPropertyValue("--text").trim(), cursor: style.getPropertyValue("--accent").trim() },
+    };
+  }
+  function fitCompletedEntry(entry) {
+    // Reflow at the normal output height before compacting short command results.
+    entry.host.style.height = "";
+    entry.fit.fit();
+    const buffer = entry.terminal.buffer.active;
+    const lines = Math.max(1, Math.min(entry.terminal.rows, buffer.baseY + buffer.cursorY + 1));
+    const screen = entry.terminal.element.querySelector(".xterm-screen");
+    const cellHeight = screen.getBoundingClientRect().height / entry.terminal.rows;
+    entry.host.style.height = `${Math.ceil(lines * cellHeight + 8)}px`;
+    entry.fit.fit();
+  }
+  const appearanceObserver = new MutationObserver(() => {
+    if (!entries.size) return;
+    const appearance = terminalAppearance();
+    for (const entry of entries.values()) {
+      entry.terminal.options.fontFamily = appearance.fontFamily;
+      entry.terminal.options.fontSize = appearance.fontSize;
+      entry.terminal.options.theme = appearance.theme;
+      if (entry.host.clientWidth > 0 && entry.host.clientHeight > 0) {
+        if (entry.finished) fitCompletedEntry(entry);
+        else if (current === entry.id) entry.fit.fit();
+      }
+    }
+  });
+  appearanceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["style"] });
+
   function setReady(ready) {
     input.disabled = !ready;
     input.type = current ? "password" : "text";
@@ -43,6 +77,7 @@ export function installCommandTerminal({ localCompanion }) {
     entry.status.textContent = `${entry.phase} · ${((performance.now() - entry.startedAt) / 1000).toFixed(1)}s`;
   }
   function finishEntry(entry, message) {
+    entry.finished = true;
     window.clearInterval(entry.timer);
     entry.status.classList.remove("is-running");
     entry.status.textContent = message;
@@ -51,9 +86,7 @@ export function installCommandTerminal({ localCompanion }) {
     // Preserve the rendered scrollback while returning short commands to a compact layout.
     entry.terminal.write("", () => {
       if (!entries.has(entry.id)) return;
-      const buffer = entry.terminal.buffer.active;
-      const lines = Math.max(1, Math.min(entry.terminal.rows, buffer.cursorY + 1));
-      entry.host.style.height = `${Math.ceil(lines * entry.terminal.options.fontSize * entry.terminal.options.lineHeight + 8)}px`;
+      fitCompletedEntry(entry);
     });
   }
   function clearEntries() {
@@ -96,18 +129,16 @@ export function installCommandTerminal({ localCompanion }) {
     status.className = "entry-status is-running";
     entry.append(heading, host, stderr, status);
     output.appendChild(entry);
-    const style = getComputedStyle(document.body);
     const terminal = new window.Terminal({
       cols: 80, rows: 18, scrollback: 5000, cursorBlink: true,
-      fontFamily: style.fontFamily, fontSize: parseFloat(style.fontSize), lineHeight: 1.3,
-      theme: { background: style.getPropertyValue("--bg").trim(), foreground: style.getPropertyValue("--text").trim(), cursor: style.getPropertyValue("--accent").trim() },
+      ...terminalAppearance(), lineHeight: 1.3,
       allowProposedApi: false, screenReaderMode: true,
     });
     const fit = new window.FitAddon.FitAddon();
     terminal.loadAddon(fit);
     terminal.open(host);
     fit.fit();
-    const record = { id, host, terminal, stderr, status, startedAt: performance.now(), phase: "starting PowerShell" };
+    const record = { id, host, terminal, fit, stderr, status, finished: false, startedAt: performance.now(), phase: "starting PowerShell" };
     terminal.onData((text) => sendInput(id, text));
     // Keep Ctrl+C in the console; it interrupts SSH's foreground command normally.
     terminal.attachCustomKeyEventHandler((event) => {
@@ -119,7 +150,7 @@ export function installCommandTerminal({ localCompanion }) {
       return true;
     });
     terminal.onResize(({ cols, rows }) => {
-      if (current === id && socket?.readyState === WebSocket.OPEN)
+      if (!record.finished && current === id && socket?.readyState === WebSocket.OPEN)
         socket.send(JSON.stringify({ type: "resize", id, cols, rows }));
     });
     record.resizeObserver = new ResizeObserver(() => {
@@ -223,5 +254,5 @@ export function installCommandTerminal({ localCompanion }) {
   byId("clear-button").addEventListener("click", () => { if (!current) clearEntries(); });
   if (localCompanion) connect();
   else { setReady(false); appendLine("Command service unavailable in this preview.", "entry-status"); }
-  return () => { stopped = true; window.clearTimeout(retryTimer); clearEntries(); socket?.close(); };
+  return () => { stopped = true; appearanceObserver.disconnect(); window.clearTimeout(retryTimer); clearEntries(); socket?.close(); };
 }

@@ -42,10 +42,10 @@ Run `npm test` for the JavaScript checks and `npm run preview` for a browser pre
 
 Run `npm run test:media` for session-priority, Windows timeline, lyric parsing, provider matching/cache/cooldown, and asynchronous track-switch checks. These checks use local fixtures and make no external requests.
 
-Run `npm run test:audio` for audio-device recovery fixtures and `npm run test:storage` for system-disk selection fixtures. Audio tests also accept `-- --device-check` to check native capture initialization on the current output device.
+Run `npm run test:audio` for audio-device recovery fixtures and `npm run test:storage` for system-disk selection fixtures. Use `npm run test:audio -- -- --device-check` to also check native capture initialization on the current output device.
 
 Run `npm run test:terminal` on Windows for interactive console checks. The xterm.js renderer and fit addon are bundled locally with their MIT licenses; after changing their pinned npm versions, run `npm run vendor:terminal` to refresh the assets.
 
-For browser layout checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs` and run `node tools/check-display-layout.mjs` and `node tools/check-lyrics-layout.mjs`. They use local fixtures without external requests and save screenshots under `artifacts/`.
+For browser checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs` and run `node tools/check-display-layout.mjs`, `node tools/check-lyrics-layout.mjs`, and `node tools/check-terminal-appearance.mjs`. They use local fixtures without external requests. Layout captures are saved under `artifacts/`.
 
 When updating an existing installation, wait for commands to finish, stop the companion, run `./telemetry/publish.ps1`, restart the companion, and refresh the wallpaper. Publishing stops with an error if dependency restore or the build fails.

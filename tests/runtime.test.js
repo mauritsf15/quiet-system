@@ -65,7 +65,7 @@ test("browser preview keeps simulated dashboard data and disables live commands"
 });
 
 function terminalFixture(t, fetchSession) {
-  const originals = Object.fromEntries(["window", "document", "WebSocket", "fetch"].map((name) => [name, globalThis[name]]));
+  const originals = Object.fromEntries(["window", "document", "WebSocket", "fetch", "MutationObserver"].map((name) => [name, globalThis[name]]));
   const elements = new Map();
   class Element extends EventTarget {
     value = "";
@@ -75,13 +75,19 @@ function terminalFixture(t, fetchSession) {
     replaceChildren() {}
   }
   const sockets = [];
+  const observers = [];
+  globalThis.MutationObserver = class {
+    constructor(callback) { this.callback = callback; observers.push(this); }
+    observe() {}
+    disconnect() { this.disconnected = true; }
+  };
   class Socket extends EventTarget {
     static OPEN = 1;
     readyState = 1;
     constructor(url) { super(); this.url = url; sockets.push(this); }
     close() { this.readyState = 3; this.dispatchEvent(new Event("close")); }
   }
-  globalThis.document = Object.assign(new EventTarget(), { getElementById(id) {
+  globalThis.document = Object.assign(new EventTarget(), { documentElement: {}, getElementById(id) {
     if (!elements.has(id)) elements.set(id, new Element());
     return elements.get(id);
   } });
@@ -90,7 +96,7 @@ function terminalFixture(t, fetchSession) {
   globalThis.fetch = fetchSession;
   t.after(() => Object.assign(globalThis, originals));
   const dispose = installCommandTerminal({ localCompanion: true });
-  return { elements, sockets, dispose };
+  return { elements, sockets, observers, dispose };
 }
 
 test("commands-only pages receive identity from their command connection", async (t) => {
@@ -103,6 +109,7 @@ test("commands-only pages receive identity from their command connection", async
   assert.equal(fixture.elements.get("shell-identity").textContent, "desktop-user@desktop-host");
   assert.equal(fixture.elements.get("command-connection").textContent, "READY");
   fixture.dispose();
+  assert.equal(fixture.observers[0].disconnected, true);
 });
 
 test("closing a page during its session request cannot open an orphan command connection", async (t) => {
