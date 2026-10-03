@@ -1,0 +1,13 @@
+telemetry/bin/
+telemetry/obj/
+telemetry/publish/
+telemetry/publish-next/
+telemetry/publish-backup/
+telemetry/.packages/
+telemetry/.dotnet-home/
+node_modules/
+.npm-cache/
+tests/Terminal.Integration/bin/
+tests/Terminal.Integration/obj/
+*.user
+*.suo

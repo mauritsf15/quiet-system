@@ -1,0 +1,14 @@
+{
+  "contentrating": "Everyone",
+  "description": "Static preview of Quiet System. Use the locally hosted URL for live commands, media, and audio.",
+  "file": "index.html",
+  "general": {
+    "properties": {},
+    "supportsaudioprocessing": false
+  },
+  "tags": ["Technology"],
+  "title": "Quiet System (preview)",
+  "type": "web",
+  "version": 1,
+  "visibility": "private"
+}
