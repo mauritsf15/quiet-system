@@ -93,7 +93,7 @@ try {
       await page.waitForTimeout(320);
       const after = await geometry(page);
       assert.deepEqual(after, before, `${name} ${scale}: lyrics must not move dashboard content or add scrolling`);
-      if (name !== "narrow") {
+      {
         assert.equal(await page.locator(".lyric-pair.is-active .lyric-current").textContent(), "A quiet signal moves across the room");
         assert.ok(after.lyrics.y >= after.media.y && after.lyrics.bottom <= after.media.bottom, `${name}: lyrics fit in panel`);
         assert.ok(after.progress.bottom <= after.media.bottom, `${name}: progress fits in panel`);
@@ -102,7 +102,7 @@ try {
         }));
         assert.deepEqual(style, { overflow: "hidden", whiteSpace: "nowrap", ellipsis: "ellipsis" });
         if (scale === 1) await page.screenshot({ path: resolve(output, `${name}.png`) });
-      } else assert.equal(await page.locator("#media-panel").isVisible(), false);
+      }
       assert.deepEqual(errors, [], `${name}: no browser errors`);
       checks++;
       await page.close();

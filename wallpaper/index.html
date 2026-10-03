@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="dark" />
     <title>Quiet System</title>
     <link rel="stylesheet" href="./vendor/xterm/xterm.css" />
-    <link rel="stylesheet" href="./styles/dashboard.css?v=20261003c" />
+    <link rel="stylesheet" href="./styles/dashboard.css?v=20261003d" />
   </head>
   <body>
     <main class="app">
@@ -52,21 +52,13 @@
         </section>
         <div id="audio-spectrum" class="audio-spectrum" aria-label="Live audio visualizer"></div>
       </section>
-      <section class="command-panel" aria-label="Command and chat panel">
+      <section class="command-panel" aria-label="PowerShell command panel">
         <div id="terminal-view" class="panel-view is-active">
-          <header class="command-head"><div><h1>PowerShell</h1></div><div class="command-meta"><span id="shell-identity">user@host</span><span id="command-connection">CONNECTING</span><button id="open-window-button" class="text-button" type="button">open window</button></div></header>
-          <div class="command-divider"><span>output</span><div><button id="chat-button" type="button">chat</button><button id="clear-button" type="button">clear</button></div></div>
+          <header class="command-head"><div><h1>PowerShell</h1></div><div class="command-meta"><span id="shell-identity">user@host</span><span id="command-connection">CONNECTING</span></div></header>
+          <div class="command-divider"><span>output</span><div><button id="clear-button" type="button">clear</button></div></div>
           <div id="command-output" class="command-output" role="log" aria-live="polite"></div>
           <form id="command-form" class="command-form" autocomplete="off"><label id="command-cwd" for="command-input">~</label><span class="prompt-sign">❯</span><input id="command-input" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="PowerShell command" placeholder="Enter a command…" disabled /><button id="run-button" type="submit" disabled>RUN ↵</button><button id="stop-button" type="button" hidden>STOP</button></form>
-          <footer class="command-footer"><span id="command-help">Waiting for local companion</span><span id="window-help"></span></footer>
-        </div>
-        <div id="chat-view" class="panel-view chat-view" aria-hidden="true" inert>
-          <header class="chat-head"><button id="chat-back" class="text-button" type="button">← terminal</button><h1>Chat</h1><button id="chat-new" class="text-button" type="button">new chat</button></header>
-          <div id="chat-status" class="chat-status">Connecting…</div>
-          <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
-          <div id="chat-signin" class="chat-signin" hidden><p>Sign in with ChatGPT to use your subscription.</p><button id="chat-signin-button" type="button">Sign in with ChatGPT</button></div>
-          <form id="chat-form" class="chat-form" autocomplete="off"><textarea id="chat-input" rows="2" aria-label="Chat message" placeholder="Message…" disabled></textarea><button id="chat-send" type="submit" disabled>Send ↵</button></form>
-          <footer class="chat-footer">A new conversation starts each time you enter chat.</footer>
+          <footer class="command-footer"><span id="command-help">Waiting for local companion</span></footer>
         </div>
       </section>
     </main>
@@ -74,6 +66,6 @@
     <div id="demo-badge" class="demo-badge">BROWSER PREVIEW · SIMULATED DATA</div>
     <script src="./vendor/xterm/xterm.js"></script>
     <script src="./vendor/xterm/addon-fit.js"></script>
-    <script type="module" src="./src/main.js?v=20261003c"></script>
+    <script type="module" src="./src/main.js?v=20261003d"></script>
   </body>
 </html>

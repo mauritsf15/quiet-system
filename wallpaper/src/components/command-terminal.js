@@ -135,7 +135,10 @@ export function installCommandTerminal({ localCompanion }) {
   }
   function handle(packet) {
     if (packet.cwd) { cwd = packet.cwd; cwdLabel.textContent = cwd; cwdLabel.title = cwd; }
-    if (packet.type === "ready") { setReady(true); input.focus(); return; }
+    if (packet.type === "ready") {
+      if (packet.username && packet.hostname) byId("shell-identity").textContent = `${packet.username}@${packet.hostname}`;
+      setReady(true); input.focus(); return;
+    }
     const entry = entries.get(packet.id);
     if (!entry) return;
     if (["start", "stdout", "stderr"].includes(packet.type) && entry.phase !== "stopping") { entry.phase = "running"; updateRunningStatus(entry); }
@@ -158,6 +161,7 @@ export function installCommandTerminal({ localCompanion }) {
       const response = await fetch("/api/session", { cache: "no-store" });
       if (!response.ok) throw new Error("session unavailable");
       const { token } = await response.json();
+      if (stopped) return;
       socket = new WebSocket(`ws://127.0.0.1:9876/commands?token=${encodeURIComponent(token)}`);
       socket.addEventListener("message", (event) => { try { handle(JSON.parse(event.data)); } catch { /* Ignore malformed messages. */ } });
       socket.addEventListener("close", () => {

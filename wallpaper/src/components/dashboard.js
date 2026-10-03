@@ -2,11 +2,6 @@ import { duration, uptime } from "../core/format.js";
 import { installLyrics } from "../media/lyrics-controller.js?v=20261003c";
 
 const el = (id) => document.getElementById(id);
-const bars = Array.from({ length: 48 }, () => {
-  const bar = document.createElement("i");
-  el("audio-spectrum").appendChild(bar);
-  return bar;
-});
 let lastArtwork = null;
 
 function renderClock(store) {
@@ -49,7 +44,7 @@ function renderState(state) {
   }
 }
 
-function updateAudio(levels, available = true) {
+function updateAudio(bars, levels, available = true) {
   for (let index = 0; index < bars.length; index += 1) {
     const level = Math.max(0, Math.min(1, Number(levels[index]) || 0));
     bars[index].style.height = `${Math.max(4, level * 100)}%`;
@@ -59,6 +54,11 @@ function updateAudio(levels, available = true) {
 }
 
 export function installDashboard(store, { localCompanion }) {
+  const bars = Array.from({ length: 48 }, () => {
+    const bar = document.createElement("i");
+    el("audio-spectrum").appendChild(bar);
+    return bar;
+  });
   let liveSocket;
   let retryTimer;
   let stopped = false;
@@ -75,17 +75,18 @@ export function installDashboard(store, { localCompanion }) {
         const packet = JSON.parse(event.data);
         if (packet.type === "media") store.update((state) => ({ ...state, media: { ...state.media, ...packet.data } }));
         if (packet.type === "lyrics") lyrics.receive(packet.data);
-        if (packet.type === "audio") updateAudio(packet.levels || [], packet.available);
+        if (packet.type === "audio") updateAudio(bars, packet.levels || [], packet.available);
       } catch { /* Ignore malformed live packets. */ }
     });
     liveSocket.addEventListener("close", () => {
-      updateAudio([], false);
+      updateAudio(bars, [], false);
       lyrics.disconnect();
+      store.update((state) => ({ ...state, media: { ...state.media, enabled: false, state: "stopped" } }));
       if (!stopped) retryTimer = window.setTimeout(connectLive, 2500);
     });
     liveSocket.addEventListener("error", () => liveSocket.close());
   }
   if (localCompanion) connectLive();
-  else updateAudio([], false);
+  else updateAudio(bars, [], false);
   return () => { stopped = true; unsubscribe(); lyrics.dispose(); window.clearInterval(clockTimer); window.clearInterval(retryTimer); liveSocket?.close(); };
 }

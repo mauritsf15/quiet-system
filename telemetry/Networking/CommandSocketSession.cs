@@ -119,7 +119,8 @@ public static class CommandSocketSession
 
         try
         {
-            await SendAsync(new { type = "ready", protocol = 2, cwd = workingDirectory });
+            await SendAsync(new { type = "ready", protocol = 2, cwd = workingDirectory,
+                username = Environment.UserName, hostname = Environment.MachineName });
             var buffer = new byte[16_384];
             using var frame = new MemoryStream();
             while (socket.State == WebSocketState.Open && !lifetime.IsCancellationRequested)
