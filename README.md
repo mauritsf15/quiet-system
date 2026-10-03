@@ -1,76 +1,143 @@
 # Quiet System
 
-A locally hosted Wallpaper Engine dashboard with live hardware telemetry, media artwork, synchronized lyrics, system audio visualization, and a PowerShell command pane. Commands run under your Windows account on your own computer.
+A Wallpaper Engine dashboard for system stats, music, lyrics, weather, and audio visualization. The command pane runs PowerShell on your PC using your Windows account.
 
 ## Install
 
-Requirements: Windows 10 (version 2004 or newer) or Windows 11 on an x64 PC, and Wallpaper Engine. The release includes the .NET 8 runtime; you do not need to install .NET, Node.js, or developer tools.
+**You need:** Wallpaper Engine and an x64 PC with Windows 10 (version 2004 or newer) or Windows 11. The download includes the .NET runtime; no developer tools are needed.
 
-1. Open this repository's **Releases** page and download `Quiet-System-0.1.0-win-x64.zip` (the ready-to-run download, rather than GitHub's automatic source ZIP).
-2. Right-click the ZIP and choose **Extract All**. Move the extracted folder somewhere permanent, such as Documents. Keep the executable and `wallpaper` folder together.
-3. Double-click **Install Quiet System.cmd** for guided setup. It checks the extracted files, offers to start the companion, asks whether you want startup with Windows, and offers to copy the wallpaper URL and launch Wallpaper Engine. It does not require administrator access. If Windows shows a security warning, verify that the download came from this repository; the first release is unsigned. You can also start the app directly with **Start Quiet System.cmd** or `QuietSystem.Telemetry.exe`.
-4. In Wallpaper Engine, choose **Open Wallpaper → Open from URL** and enter `http://127.0.0.1:9876/wallpaper/`.
-5. Open **settings** in the wallpaper. Search for your city or postal code, then select the correct result. Alternatively, click **Use my location** and allow location access. If detection is unavailable in Wallpaper Engine, use city search. No location is selected by default.
-6. Hide desktop icons before typing in the command pane. Wallpaper Engine only passes keyboard input to locally hosted URL wallpapers while icons are hidden. Its **Desktop icon visibility** shortcut can make switching easier.
+1. **Download** `Quiet-System-0.1.0-win-x64.zip` from the [Releases page](https://github.com/mauritsf15/quiet-system/releases). Choose the release ZIP, not the source code ZIP.
+2. **Extract** it into a permanent folder, such as Documents. Keep the app and `wallpaper` folder together.
+3. **Run** **Install Quiet System.cmd**. Follow the prompts to start the background app and optionally enable startup with Windows. No administrator access is needed.
+4. **Add the wallpaper:** in Wallpaper Engine, choose **Open Wallpaper → Open from URL** and paste:
 
-### Startup, stopping, updates, and removal
+   ```text
+   http://127.0.0.1:9876/wallpaper/
+   ```
 
-To start with Windows, right-click **Enable Startup.ps1** in the extracted folder and select **Run with PowerShell**. To undo this, run **Disable Startup.ps1** from the same folder. If Windows blocks scripts, open **Win+R → shell:startup** and add or remove a shortcut to `QuietSystem.Telemetry.exe` manually. Do not move the installation folder after enabling startup.
+5. **Set your weather location** in **settings**. Search for a city or postal code, or select **Use my location** and allow access.
+6. **Hide desktop icons** to type in the command pane. Wallpaper Engine's **Desktop icon visibility** shortcut makes switching easier.
 
-To stop the companion, run **Stop Quiet System.ps1** or end **QuietSystem.Telemetry** in Task Manager. Finish terminal commands first: stopping the companion closes its sessions.
+The first release is unsigned. If Windows shows a security warning, check that you downloaded it from this repo.
 
-To update, stop the companion, extract the new release into a new folder, disable startup from the old folder, start the new version, and enable startup from the new folder if desired. Refresh the wallpaper; the local URL remains the same. Browser settings normally remain saved.
+You can also open the URL in a browser. Keep the background app running while using Quiet System.
 
-To uninstall, disable startup, stop the companion, remove the wallpaper from Wallpaper Engine, and delete the extracted folder. Optional local crash logs are under `%LOCALAPPDATA%\QuietSystem`; deleting that folder removes them. Appearance and weather preferences are stored by the browser or Wallpaper Engine and can be removed by clearing its site data.
+## Start and stop
 
-### Troubleshooting
+- **Start:** double-click **Start Quiet System.cmd** or `QuietSystem.Telemetry.exe`.
+- **Start with Windows:** right-click **Enable Startup.ps1** and choose **Run with PowerShell**. Run **Disable Startup.ps1** to turn this off. Keep the installation folder in the same place.
+- **Stop:** finish any commands, then run **Stop Quiet System.ps1** or end **QuietSystem.Telemetry** in Task Manager. This closes command sessions.
 
-- **The local page does not open:** start the companion first. Check Task Manager and `%LOCALAPPDATA%\QuietSystem\telemetry.log` if it exits immediately. Only one companion instance can run, and port 9876 must be available.
-- **Typing does not work:** hide desktop icons and confirm that you opened the local URL above.
-- **Some sensors are unavailable:** hardware and driver support varies. The rest of the dashboard still works.
-- **Weather detection fails:** search for a city instead; browser location permission and Windows location services may be unavailable. Weather needs internet access.
-- **Music or audio is missing:** start playback in a Windows media player such as Spotify and check the default Windows output device. Lyrics are available only for tracks matched by the provider.
-- **Old interface after an update:** reopen `http://127.0.0.1:9876/wallpaper/?v=0.1.0` to bypass an old page cache.
+If Windows blocks startup scripts, press **Win+R**, enter `shell:startup`, and add or remove a shortcut to `QuietSystem.Telemetry.exe`.
 
-The command pane and live dashboard can also be opened in a normal browser at the same local URL. The companion must be running for the page to load.
+## Update or uninstall
 
-## Display layouts
+**To update:**
 
-- **One display:** dashboard on the left, command pane on the right.
-- **Two-display span:** stretch one URL wallpaper across two equal-width monitors side by side. Wide canvases use a 50/50 split: dashboard on the left, commands on the right. The page cannot discover the physical monitor boundary; use separate wallpapers for unequal widths, different scaling, or vertically arranged monitors.
-- **Separate wallpaper per display:** use `http://127.0.0.1:9876/wallpaper/?role=dashboard` on the first monitor and `http://127.0.0.1:9876/wallpaper/?role=commands` on the second. Each role fills its screen and starts only its own services.
-- **Narrow or portrait screen:** the combined view stacks dashboard above commands. Dashboard content remains available through its own scrolling area; separate roles keep the full screen.
+1. Finish commands and stop the app.
+2. Disable startup from the old folder, if enabled.
+3. Extract the new release into a new folder and start it.
+4. Enable startup from the new folder, if wanted.
+5. Refresh the wallpaper. The URL stays the same; settings usually stay saved.
 
-The **settings** button changes accent color, interface scale, weather location, and weather/storage visibility. Changes are saved in that browser's local storage and synchronize between windows sharing that storage. Separate Wallpaper Engine storage profiles retain their own settings. Location detection is a one-time request made only when you click **Use my location**; the app does not continuously track your location.
+**To uninstall:**
 
-Storage details describe the volume containing Windows; physical disk readings are shown only when that volume maps to one known disk. The audio visualizer follows the default output and reconnects after device changes or capture failures. Its 48 bars measure fixed frequency bands from 35 Hz to 16 kHz, ordered from bass to treble, using one shared decibel scale. Peaks rise quickly and fall gently; silence settles to zero. It visualizes all system audio, including sounds from other apps.
+1. Disable startup and stop the app.
+2. Remove the wallpaper from Wallpaper Engine.
+3. Delete the installation folder.
 
-Playing Spotify takes priority over YouTube and other local media players. Pausing Spotify lets another playing player take over; resuming Spotify restores its priority. When nothing is playing, paused Spotify takes priority over other paused players. This supports Spotify's Windows desktop and Microsoft Store installations.
+Optional cleanup: delete `%LOCALAPPDATA%\QuietSystem` for logs and clear the wallpaper's site data for settings.
 
-When a song has timed lyrics, its current line and upcoming line appear beneath the artist. The space is reserved so lyric changes do not move the dashboard. Pausing freezes the lyrics; seeking updates them directly. Missing lyrics, videos, and unavailable timing leave the area empty. Long lines end with an ellipsis, and reduced-motion preferences disable lyric animation. Lyrics come from LRCLIB, so recording versions, coverage, and timing can differ from Spotify's own lyrics.
+## Screens and settings
 
-## Commands and data
+- **One screen:** the default view puts the dashboard on the left and commands on the right.
+- **Two matching screens:** span one wallpaper across both for a 50/50 split.
+- **Different sizes, scaling, or vertical arrangement:** use separate wallpapers with the URLs below.
+- **Narrow or portrait screen:** the dashboard stacks above commands.
 
-The command pane runs one PowerShell command at a time in a Windows pseudoconsole. Use ↑ and ↓ for command history, `cd` to change the working directory, and `clear` to clear output. While a command runs, the bottom field becomes a hidden reply field: enter a reply and press Enter or **SEND**. Replies are never added to command history. You can also click the output area to type directly in an interactive program; the program controls echo there. For example, run `ssh user@host`, answer any host-key confirmation, then enter your password at SSH's prompt. Ctrl+C interrupts the foreground program; **STOP** ends the entire session. SSH sessions stay open until you exit, stop them, or close the page. PowerShell variables from earlier commands are not retained. A running command is stopped after one million output characters.
+For separate wallpapers:
 
-If output shows literal escape codes such as `[?25h`, or the lyrics area is missing, the wallpaper is using an old interface. Reopen its local URL with `&v=20261003d` (or `?v=20261003d` if it has no query parameters) to bypass the existing page cache. The companion serves wallpaper files with caching disabled and refuses interactive commands from old interfaces.
+| Screen | URL |
+| --- | --- |
+| Dashboard | `http://127.0.0.1:9876/wallpaper/?role=dashboard` |
+| Commands | `http://127.0.0.1:9876/wallpaper/?role=commands` |
 
-The companion listens only on `127.0.0.1:9876`. The command WebSocket requires the local wallpaper origin and a per-run token. Do not expose the companion through a network proxy. Hardware samples, your Windows username and computer name, artwork, playback position, and audio levels are used locally on your computer; they are not uploaded by the companion. Terminal history is kept in page memory. Crash logs stay in `%LOCALAPPDATA%\QuietSystem` and may contain local paths; check them before sharing.
+Open **settings** to change the accent color, interface size, weather location, or weather and storage visibility. Settings are saved locally; separate Wallpaper Engine profiles may have different settings.
 
-Lyrics lookups send the song title, artist, album, and duration to [LRCLIB](https://lrclib.net/docs), without a Spotify account connection or API key. Matches and missing results are cached in memory, and provider rate-limit cooldowns are honored. Weather requests send the selected coordinates (rounded to three decimal places) to [Open-Meteo](https://open-meteo.com/) and refresh every 15 minutes, and immediately when the location changes or weather is enabled. City search sends the entered city or postal code to Open-Meteo's geocoding service, which uses [GeoNames](https://www.geonames.org/) data. Those external services also see your IP address. No city or personal coordinates are bundled with the app. Disable weather to stop forecast requests; choosing **Use my location** additionally uses your browser's location service with your permission.
+- **Music:** playing Spotify takes priority. Pause it to show another playing app. When nothing plays, paused Spotify takes priority.
+- **Lyrics:** matched tracks show the current and next line. Availability and timing may differ from Spotify.
+- **Audio:** the visualizer shows all system audio from your default output device, from bass to treble.
+- **Storage:** readings cover the drive containing Windows. Physical disk stats appear only when it maps to one known disk.
+
+## Use the command pane
+
+Run one PowerShell command at a time. Variables from earlier commands are not kept.
+
+| Action | How |
+| --- | --- |
+| Browse history | Press ↑ or ↓. |
+| Change folder | Use `cd`. |
+| Clear output | Use `clear`. |
+| Answer a prompt | Use the hidden reply field, then Enter or **SEND**. Replies are not saved in history. |
+| Type in an interactive app | Click the output area. The app controls whether typing is visible. |
+| Interrupt a program | Press Ctrl+C. |
+| End the session | Click **STOP**. |
+
+For SSH, run `ssh user@host` and answer its prompts. Sessions stay open until you exit, stop them, or close the page. Commands stop after one million output characters.
+
+## Data and privacy
+
+- **Local data:** system stats, Windows username, computer name, artwork, playback position, and audio levels stay on your PC. Command history stays in page memory.
+- **Local access:** the app listens only at `127.0.0.1:9876`. Commands require the local wallpaper page and a temporary token. Do not expose it through a network proxy.
+- **Lyrics:** song title, artist, album, and duration go to [LRCLIB](https://lrclib.net/docs). No Spotify account connection is needed.
+- **Weather:** selected coordinates, rounded to three decimal places, go to [Open-Meteo](https://open-meteo.com/). Forecasts refresh every 15 minutes and when you change location or enable weather. Turn weather off to stop forecast requests.
+- **City search:** your search goes to Open-Meteo's location service, using [GeoNames](https://www.geonames.org/) data. No location is selected by default.
+- **Logs:** stored in `%LOCALAPPDATA%\QuietSystem`; they may contain local paths. Check before sharing.
+
+External services also see your IP address. **Use my location** requests your location once, with permission; it does not track you continuously.
+
+## Troubleshooting
+
+| Problem | Try this |
+| --- | --- |
+| Page will not open | Start the app. Only one copy can run, and port 9876 must be free. If it exits, check `%LOCALAPPDATA%\QuietSystem\telemetry.log`. |
+| Cannot type | Hide desktop icons and use the local URL from the install steps. |
+| Missing sensors | Some hardware or drivers do not support every reading. |
+| Location detection fails | Search for your city instead. Weather needs internet access. |
+| Missing music or audio | Start playback and check the default Windows output device. |
+| Missing lyrics | The provider may not have a match for that track. |
+| Old interface or strange codes like `[?25h` | Add `?v=0.1.0` to the URL, or `&v=0.1.0` if it already contains `?`. Use a new value for later updates. |
 
 ## Development
 
-Building from source requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). Run `./telemetry/publish.ps1`, then start `telemetry/publish/QuietSystem.Telemetry.exe`. The default build bundles the runtime. Pass `-FrameworkDependent` only if you intentionally want a smaller build that requires installed .NET runtimes. Run `./tools/package-release.ps1 -Version 0.1.0` to generate a clean release ZIP and SHA256 checksum under `artifacts/releases/`.
+Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), then:
 
-Run `npm test` for the JavaScript checks and `npm run preview` for a browser preview at `http://127.0.0.1:4173`. That preview simulates hardware data and leaves commands disabled. Use the companion's local URL to test live commands, media, and audio.
+1. Run `./telemetry/publish.ps1` from the repo folder.
+2. Start `telemetry/publish/QuietSystem.Telemetry.exe`.
+3. Open the local wallpaper URL from the install steps.
 
-Run `npm run test:media` for session-priority, Windows timeline, lyric parsing, provider matching/cache/cooldown, and asynchronous track-switch checks. These checks use local fixtures and make no external requests.
+Builds include the runtime. Add `-FrameworkDependent` for a smaller build that requires .NET on the target PC. Before rebuilding, finish commands and stop the app; afterward, restart and refresh.
 
-Run `npm run test:audio` for frequency-analysis and audio-device recovery fixtures and `npm run test:storage` for system-disk selection fixtures. Use `npm run test:audio -- -- --device-check` to also check native capture initialization on the current output device.
+| Command | Purpose |
+| --- | --- |
+| `npm run preview` | Preview at `http://127.0.0.1:4173` with sample data and commands disabled. |
+| `npm test` | JavaScript checks. |
+| `npm run test:media` | Media and lyrics checks. |
+| `npm run test:audio` | Audio analysis and device recovery checks. |
+| `npm run test:storage` | System disk selection checks. |
+| `npm run test:terminal` | Interactive console checks on Windows. |
+| `./tools/package-release.ps1 -Version 0.1.0` | Create a release ZIP and SHA256 checksum in `artifacts/releases/`. |
 
-Run `npm run test:terminal` on Windows for interactive console checks. The xterm.js renderer and fit addon are bundled locally with their MIT licenses; after changing their pinned npm versions, run `npm run vendor:terminal` to refresh the assets.
+Use the app's local URL for live commands, media, and audio. Add `-- -- --device-check` to the audio test command to check your current output device.
 
-For browser checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs` and run `node tools/check-display-layout.mjs`, `node tools/check-lyrics-layout.mjs`, and `node tools/check-terminal-appearance.mjs`. They use local fixtures without external requests. Layout captures are saved under `artifacts/`.
+For browser checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs`, then run:
 
-When updating an existing installation, wait for commands to finish, stop the companion, run `./telemetry/publish.ps1`, restart the companion, and refresh the wallpaper. Publishing stops with an error if dependency restore or the build fails.
+```powershell
+node tools/check-display-layout.mjs
+node tools/check-lyrics-layout.mjs
+node tools/check-terminal-appearance.mjs
+```
+
+Media and browser checks use local fixtures without external requests. Browser captures go in `artifacts/`.
+
+After changing the pinned xterm.js or fit addon versions, run `npm run vendor:terminal` to refresh the bundled assets and MIT licenses.
