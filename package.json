@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
+    "test:media": "dotnet run --project tests/Media.Integration/Media.Integration.csproj",
     "preview": "node tools/preview-server.mjs",
     "vendor:terminal": "node tools/sync-terminal-assets.mjs",
     "test:terminal": "dotnet run --project tests/Terminal.Integration/Terminal.Integration.csproj"

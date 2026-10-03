@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="dark" />
     <title>Quiet System</title>
     <link rel="stylesheet" href="./vendor/xterm/xterm.css" />
-    <link rel="stylesheet" href="./styles/dashboard.css?v=20261003b" />
+    <link rel="stylesheet" href="./styles/dashboard.css?v=20261003c" />
   </head>
   <body>
     <main class="app">
@@ -38,7 +38,17 @@
         <div class="section-title media-heading"><span>media</span><span id="audio-label">system audio</span></div>
         <section id="media-panel" class="media-panel" aria-label="Media and audio">
           <div id="album-art" class="album-art"><span>no art</span></div>
-          <div class="media-info"><p id="media-state" class="eyebrow">NO ACTIVE MEDIA</p><h2 id="media-title">Nothing playing</h2><p id="media-artist">—</p><div class="media-progress"><span id="media-progress-fill"></span></div><div class="media-times"><span id="media-position">--:--</span><span id="media-duration">--:--</span></div></div>
+          <div class="media-info">
+            <p id="media-state" class="eyebrow">NO ACTIVE MEDIA</p>
+            <h2 id="media-title">Nothing playing</h2>
+            <p id="media-artist">—</p>
+            <div id="media-lyrics" class="media-lyrics" role="group" aria-label="Song lyrics" aria-hidden="true">
+              <div class="lyric-pair" aria-hidden="true"><p class="lyric-current"></p><p class="lyric-next"></p></div>
+              <div class="lyric-pair" aria-hidden="true"><p class="lyric-current"></p><p class="lyric-next"></p></div>
+            </div>
+            <div class="media-progress"><span id="media-progress-fill"></span></div>
+            <div class="media-times"><span id="media-position">--:--</span><span id="media-duration">--:--</span></div>
+          </div>
         </section>
         <div id="audio-spectrum" class="audio-spectrum" aria-label="Live audio visualizer"></div>
       </section>
@@ -64,6 +74,6 @@
     <div id="demo-badge" class="demo-badge">BROWSER PREVIEW · SIMULATED DATA</div>
     <script src="./vendor/xterm/xterm.js"></script>
     <script src="./vendor/xterm/addon-fit.js"></script>
-    <script type="module" src="./src/main.js?v=20261003b"></script>
+    <script type="module" src="./src/main.js?v=20261003c"></script>
   </body>
 </html>

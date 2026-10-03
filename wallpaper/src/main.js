@@ -6,7 +6,7 @@ import { startDemoTelemetry } from "./core/demo-telemetry.js";
 import { startWeatherService } from "./core/weather-service.js";
 import { installMediaIntegration } from "./media/media-controller.js";
 import { renderResources } from "./components/resources.js?v=20261002a";
-import { installDashboard } from "./components/dashboard.js";
+import { installDashboard } from "./components/dashboard.js?v=20261003c";
 import { installCommandTerminal } from "./components/command-terminal.js?v=20261003b";
 import { installAppearance } from "./components/appearance.js";
 

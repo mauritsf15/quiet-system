@@ -19,6 +19,16 @@ builder.Services.AddSingleton<HardwareTelemetryCollector>();
 builder.Services.AddHostedService<TelemetryWorker>();
 builder.Services.AddSingleton<MediaSource>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<MediaSource>());
+builder.Services.AddSingleton(new HttpClient
+{
+    BaseAddress = new Uri("https://lrclib.net/api/"),
+    Timeout = TimeSpan.FromSeconds(10),
+    MaxResponseContentBufferSize = 2_000_000,
+    DefaultRequestHeaders = { { "User-Agent", "QuietSystem/1.0 (Wallpaper Engine companion; https://openai.com/codex/)" } }
+});
+builder.Services.AddSingleton<LyricsClient>();
+builder.Services.AddSingleton<LyricsSource>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<LyricsSource>());
 builder.Services.AddSingleton<AudioSource>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<AudioSource>());
 
@@ -71,6 +81,7 @@ app.Map("/live", async context =>
     using var socket = await context.WebSockets.AcceptWebSocketAsync();
     await LiveSocketSession.RunAsync(socket,
         context.RequestServices.GetRequiredService<MediaSource>(),
+        context.RequestServices.GetRequiredService<LyricsSource>(),
         context.RequestServices.GetRequiredService<AudioSource>(), context.RequestAborted);
 });
 

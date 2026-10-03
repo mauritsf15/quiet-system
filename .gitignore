@@ -9,5 +9,8 @@ node_modules/
 .npm-cache/
 tests/Terminal.Integration/bin/
 tests/Terminal.Integration/obj/
+tests/Media.Integration/bin/
+tests/Media.Integration/obj/
+artifacts/
 *.user
 *.suo

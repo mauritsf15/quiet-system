@@ -32,6 +32,12 @@ export const initialState = {
     primaryColor: "",
     position: null,
     duration: null,
+    trackKey: "",
+    sessionId: "",
+    sourceAppId: "",
+    mediaType: "unknown",
+    capturedAt: 0,
+    playbackRate: 1,
   },
   settings: {
     accentRgb: [112, 190, 255],

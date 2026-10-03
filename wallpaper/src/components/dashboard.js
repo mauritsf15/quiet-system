@@ -1,4 +1,5 @@
 import { duration, uptime } from "../core/format.js";
+import { installLyrics } from "../media/lyrics-controller.js?v=20261003c";
 
 const el = (id) => document.getElementById(id);
 const bars = Array.from({ length: 48 }, () => {
@@ -62,6 +63,7 @@ export function installDashboard(store, { localCompanion }) {
   let retryTimer;
   let stopped = false;
   const clockTimer = window.setInterval(() => renderClock(store), 1000);
+  const lyrics = installLyrics(store);
   renderClock(store);
   const unsubscribe = store.subscribe(renderState);
 
@@ -72,16 +74,18 @@ export function installDashboard(store, { localCompanion }) {
       try {
         const packet = JSON.parse(event.data);
         if (packet.type === "media") store.update((state) => ({ ...state, media: { ...state.media, ...packet.data } }));
+        if (packet.type === "lyrics") lyrics.receive(packet.data);
         if (packet.type === "audio") updateAudio(packet.levels || [], packet.available);
       } catch { /* Ignore malformed live packets. */ }
     });
     liveSocket.addEventListener("close", () => {
       updateAudio([], false);
+      lyrics.disconnect();
       if (!stopped) retryTimer = window.setTimeout(connectLive, 2500);
     });
     liveSocket.addEventListener("error", () => liveSocket.close());
   }
   if (localCompanion) connectLive();
   else updateAudio([], false);
-  return () => { stopped = true; unsubscribe(); window.clearInterval(clockTimer); window.clearInterval(retryTimer); liveSocket?.close(); };
+  return () => { stopped = true; unsubscribe(); lyrics.dispose(); window.clearInterval(clockTimer); window.clearInterval(retryTimer); liveSocket?.close(); };
 }
