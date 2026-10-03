@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Quiet System</title>
+    <link rel="stylesheet" href="./vendor/xterm/xterm.css" />
+    <link rel="stylesheet" href="./styles/dashboard.css?v=0.1.0" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="dashboard" aria-label="Live dashboard">
+        <header class="dashboard-head">
+          <div class="brand"><strong>quiet system</strong></div>
+          <button id="settings-button" class="icon-button" type="button" aria-label="Open appearance settings">settings</button>
+        </header>
+        <section class="overview">
+          <div><p id="clock-weekday" class="eyebrow">LOCAL TIME</p><div id="clock-time" class="clock-time">--:--<small>--</small></div><p id="clock-date" class="overview-date">--</p></div>
+          <div class="overview-status"><span class="live-dot"></span><span id="connection-label">CONNECTING</span><small id="system-line">Windows · uptime --</small><small id="weather-line">Weather / acquiring</small></div>
+        </section>
+        <div class="section-title system-heading">
+          <div class="system-heading-label">
+            <span>system</span>
+            <details id="storage-indicator" class="storage-indicator" data-metric="storage">
+              <summary id="storage-summary" title="Show storage details"><span>Storage</span><strong id="storage-value">--%</strong><span>used</span><span class="storage-track" aria-hidden="true"><span id="storage-bar"></span></span></summary>
+              <div class="storage-details"><p id="storage-detail">Storage sensor unavailable</p><p id="storage-io">Read -- · Write --</p><p id="storage-warning" hidden>Nearly full · consider freeing some space</p></div>
+            </details>
+          </div>
+          <span id="status-message">Initializing telemetry</span>
+        </div>
+        <section id="resources" class="resources" aria-label="Resource telemetry">
+          <article class="metric" data-metric="cpu"><div class="metric-heading"><span>CPU</span><strong id="cpu-value">--%</strong></div><div id="cpu-graph" class="sparkline"><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path class="graph-fill"></path><path class="graph-line"></path></svg></div><p id="cpu-detail">Sensor unavailable</p></article>
+          <article class="metric" data-metric="gpu"><div class="metric-heading"><span>GPU</span><strong id="gpu-value">--%</strong></div><div id="gpu-graph" class="sparkline"><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path class="graph-fill"></path><path class="graph-line"></path></svg></div><p id="gpu-detail">Sensor unavailable</p></article>
+          <article class="metric" data-metric="memory"><div class="metric-heading"><span>MEMORY</span><strong id="memory-value">--%</strong></div><div id="memory-graph" class="sparkline"><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path class="graph-fill"></path><path class="graph-line"></path></svg></div><p id="memory-detail">Sensor unavailable</p></article>
+          <article class="metric" data-metric="network"><div class="metric-heading"><span>NETWORK</span><strong id="network-value">--</strong></div><div id="network-graph" class="sparkline"><svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path class="graph-fill"></path><path class="graph-line"></path></svg></div><p id="network-detail">Sensor unavailable</p></article>
+        </section>
+        <div class="section-title media-heading"><span>media</span><span id="audio-label">system audio</span></div>
+        <section id="media-panel" class="media-panel" aria-label="Media and audio">
+          <div id="album-art" class="album-art"><span>no art</span></div>
+          <div class="media-info">
+            <p id="media-state" class="eyebrow">NO ACTIVE MEDIA</p>
+            <h2 id="media-title">Nothing playing</h2>
+            <p id="media-artist">—</p>
+            <div id="media-lyrics" class="media-lyrics" role="group" aria-label="Song lyrics" aria-hidden="true">
+              <div class="lyric-pair" aria-hidden="true"><p class="lyric-current"></p><p class="lyric-next"></p></div>
+              <div class="lyric-pair" aria-hidden="true"><p class="lyric-current"></p><p class="lyric-next"></p></div>
+            </div>
+            <div class="media-progress"><span id="media-progress-fill"></span></div>
+            <div class="media-times"><span id="media-position">--:--</span><span id="media-duration">--:--</span></div>
+          </div>
+        </section>
+        <div class="audio-spectrum-panel">
+          <div id="audio-spectrum" class="audio-spectrum" role="img" aria-label="Live system audio: 48 fixed frequency bands from 35 Hz to 16 kHz, bass to treble"></div>
+          <div class="audio-spectrum-axis" aria-hidden="true"><span>35 Hz · bass</span><span>midrange</span><span>treble · 16 kHz</span></div>
+        </div>
+      </section>
+      <section class="command-panel" aria-label="PowerShell command panel">
+        <div id="terminal-view" class="panel-view is-active">
+          <header class="command-head"><div><h1>PowerShell</h1></div><div class="command-meta"><span id="shell-identity">user@host</span><span id="command-connection">CONNECTING</span></div></header>
+          <div class="command-divider"><span>output</span><div><button id="clear-button" type="button">clear</button></div></div>
+          <div id="command-output" class="command-output" role="log" aria-live="polite"></div>
+          <form id="command-form" class="command-form" autocomplete="off"><label id="command-cwd" for="command-input">~</label><span class="prompt-sign">❯</span><input id="command-input" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="PowerShell command" placeholder="Enter a command…" disabled /><button id="run-button" type="submit" disabled>RUN ↵</button><button id="stop-button" type="button" hidden>STOP</button></form>
+          <footer class="command-footer"><span id="command-help">Waiting for local companion</span></footer>
+        </div>
+      </section>
+    </main>
+    <dialog id="settings-dialog" class="settings-dialog"><form method="dialog">
+      <div class="settings-head"><div><p class="eyebrow">SETTINGS</p><h2>Appearance & weather</h2></div><button type="submit" aria-label="Close settings">✕</button></div>
+      <label>Accent color <input id="setting-accent" type="color" value="#83adbf" /></label>
+      <label>Interface scale <input id="setting-scale" type="range" min="0.85" max="1.15" step="0.01" value="1" /></label>
+      <label class="setting-check"><input id="setting-weather" type="checkbox" checked /> Show weather</label>
+      <label for="setting-city">Weather location</label>
+      <div class="location-search"><input id="setting-city" type="search" placeholder="City or postal code" maxlength="120" /><button id="location-search" type="button">Search</button></div>
+      <select id="location-results" aria-label="Matching locations" hidden></select>
+      <button id="location-detect" class="location-detect" type="button">Use my location</button>
+      <p id="location-status" class="settings-note" role="status">Choose a city to enable local weather.</p>
+      <label class="setting-check"><input id="setting-storage" type="checkbox" checked /> Show storage</label>
+      <p class="settings-note">Saved on this computer. Location detection is optional; city search works when it is unavailable.</p>
+      <p class="settings-note">Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>. Location search data by <a href="https://www.geonames.org/" target="_blank" rel="noreferrer">GeoNames</a>.</p>
+    </form></dialog>
+    <div id="demo-badge" class="demo-badge">BROWSER PREVIEW · SIMULATED DATA</div>
+    <script src="./vendor/xterm/xterm.js"></script>
+    <script src="./vendor/xterm/addon-fit.js"></script>
+    <script type="module" src="./src/main.js?v=0.1.0"></script>
+  </body>
+</html>

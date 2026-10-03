@@ -1,0 +1,109 @@
+.wallpaper {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(calc(0.992 * var(--ui-scale)));
+  transition: opacity 900ms ease, transform 1200ms cubic-bezier(.2,.75,.2,1);
+}
+
+body.is-ready .wallpaper {
+  opacity: 1;
+  transform: scale(var(--ui-scale));
+}
+
+.terminal {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  min-width: 0;
+  height: 100%;
+  padding: clamp(34px, 4vw, 78px) clamp(34px, 4.4vw, 88px) clamp(28px, 3.4vw, 64px);
+  background: linear-gradient(100deg, rgba(5, 8, 11, 0.88), rgba(5, 8, 11, 0.62) 78%, transparent);
+}
+
+.terminal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3rem;
+  margin-bottom: clamp(24px, 3vh, 48px);
+}
+
+.terminal-rule {
+  display: flex;
+  justify-content: space-between;
+  padding-block: 0.55rem;
+  border-top: 1px solid rgba(var(--accent-rgb), 0.42);
+  border-bottom: 1px solid rgba(255,255,255,0.055);
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+}
+
+.resources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  column-gap: clamp(32px, 3vw, 76px);
+  row-gap: clamp(24px, 3.6vh, 52px);
+  min-height: 0;
+  padding-block: clamp(28px, 4vh, 62px);
+}
+
+.metric--storage { grid-column: 1 / -1; }
+
+.terminal-footer {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: end;
+  gap: 1.4rem;
+  min-height: 100px;
+}
+
+.clock-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body[data-layout-role="terminal"] .wallpaper,
+body[data-layout-role="clock"] .wallpaper { grid-template-columns: 1fr; }
+
+body[data-layout-role="terminal"] .terminal {
+  padding-inline: clamp(28px, 7vw, 110px);
+  background: linear-gradient(110deg, rgba(5,8,11,.9), rgba(5,8,11,.58));
+}
+
+body[data-layout-role="terminal"] .clock-stage,
+body[data-layout-role="clock"] .terminal { display: none; }
+
+body[data-layout-role="clock"] .clock-stage { display: grid; }
+
+@media (max-aspect-ratio: 2/1) {
+  .wallpaper { grid-template-columns: 1fr; }
+  .terminal {
+    padding-inline: clamp(28px, 7vw, 110px);
+    background: linear-gradient(110deg, rgba(5,8,11,.9), rgba(5,8,11,.58));
+  }
+  .clock-stage { display: none; }
+  .header-clock { display: grid; }
+}
+
+@media (max-width: 1100px) {
+  :root { --font-size: 14px; }
+  .resources { row-gap: 22px; }
+}
+
+@media (max-height: 760px) {
+  .terminal { padding-block: 24px; }
+  .terminal-header { margin-bottom: 18px; }
+  .resources { padding-block: 20px; row-gap: 18px; }
+  .metric__detail { display: none; }
+  .terminal-footer { min-height: 76px; }
+}

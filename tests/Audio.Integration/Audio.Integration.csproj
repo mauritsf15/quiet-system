@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)../../telemetry/.packages</RestorePackagesPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="NAudio" Version="2.4.0" />
+    <Compile Include="../../telemetry/Services/AudioSource.cs" Link="AudioSource.cs" />
+    <Compile Include="../../telemetry/Services/AudioSpectrum.cs" Link="AudioSpectrum.cs" />
+  </ItemGroup>
+</Project>
