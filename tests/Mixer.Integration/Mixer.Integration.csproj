@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)../../telemetry/.packages</RestorePackagesPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.4.0" />
+    <Compile Include="../../telemetry/Services/AudioMixer.cs" Link="AudioMixer.cs" />
+  </ItemGroup>
+</Project>

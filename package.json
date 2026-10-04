@@ -6,6 +6,7 @@
     "test": "node --test \"tests/*.test.js\"",
     "test:media": "dotnet run --project tests/Media.Integration/Media.Integration.csproj",
     "test:audio": "dotnet run --project tests/Audio.Integration/Audio.Integration.csproj",
+    "test:mixer": "dotnet run --project tests/Mixer.Integration/Mixer.Integration.csproj",
     "test:storage": "dotnet run --project tests/Storage.Integration/Storage.Integration.csproj",
     "preview": "node tools/preview-server.mjs",
     "vendor:terminal": "node tools/sync-terminal-assets.mjs",

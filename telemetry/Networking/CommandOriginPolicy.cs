@@ -13,4 +13,8 @@ internal static class CommandOriginPolicy
     public static bool IsSocketAllowed(HttpRequest request) =>
         IsLocalHost(request) &&
         request.Headers.Origin.ToString().Equals(AllowedOrigin, StringComparison.Ordinal);
+
+    public static bool IsControlAllowed(HttpRequest request, string token) =>
+        IsLocalHost(request) && request.Headers["X-Session-Token"] == token &&
+        (request.Headers.Origin.Count == 0 || IsSocketAllowed(request));
 }

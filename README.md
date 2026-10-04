@@ -6,9 +6,9 @@ A Wallpaper Engine dashboard for system stats, music, lyrics, weather, and audio
 
 **You need:** Wallpaper Engine and an x64 PC with Windows 10 (version 2004 or newer) or Windows 11. The download includes the .NET runtime; no developer tools are needed.
 
-1. **Download** `Quiet-System-0.1.2-win-x64.zip` from the [Releases page](https://github.com/mauritsf15/quiet-system/releases). Choose the release ZIP, not the source code ZIP.
+1. **Download** `Quiet-System-0.1.3-win-x64.zip` from the [Releases page](https://github.com/mauritsf15/quiet-system/releases). Choose the release ZIP, not the source code ZIP.
 2. **Extract** it into a permanent folder, such as Documents. Keep the app and `wallpaper` folder together.
-3. **Run** **Install Quiet System.cmd**. Follow the prompts to start the background app and optionally enable startup with Windows. No administrator access is needed.
+3. **Run** **Install Quiet System.cmd**. Follow the prompts to start the background app and enable startup with Windows (recommended and selected by default). No administrator access is needed.
 4. **Add the wallpaper:** in Wallpaper Engine, choose **Open Wallpaper → Open from URL** and paste:
 
    ```text
@@ -65,8 +65,10 @@ For separate wallpapers:
 Open **settings** to change the accent color, interface size, weather location, or weather and storage visibility. Settings are saved locally; separate Wallpaper Engine profiles may have different settings.
 
 - **Music:** playing Spotify takes priority. Pause it to show another playing app. When nothing plays, paused Spotify takes priority.
+- **Playback:** use previous, play/pause, and next below the track timeline. Drag the timeline to preview a position, then release to seek; arrow keys also work. Controls are enabled only when the selected Windows player supports them and the local companion is connected. Volume and mute remain in the Volume Mixer.
 - **Lyrics:** matched tracks show the current and next line. Availability and timing may differ from Spotify.
 - **Audio:** the visualizer shows all system audio from your default output device, from bass to treble.
+- **Volume Mixer:** expand the panel below the visualizer to adjust master volume or mute and change individual application sessions on the default Windows output. Apps appear after creating an audio session; paused sessions remain available. Separate sessions from one app have separate sliders. Exclusive-mode audio does not support application volume controls. Output switching is not included.
 - **Storage:** readings cover the drive containing Windows. Physical disk stats appear only when it maps to one known disk.
 
 ## Use the command pane
@@ -98,6 +100,19 @@ External services also see your IP address. **Use my location** requests your lo
 
 ## Troubleshooting
 
+### Connection refused after restarting Windows
+
+The wallpaper URL uses `127.0.0.1`, which means this computer. It needs the Quiet System companion running locally each time you sign in.
+
+1. Start **Start Quiet System.cmd** from your permanent installation folder. For a source checkout, start `telemetry/publish/QuietSystem.Telemetry.exe`.
+2. Open `http://127.0.0.1:9876/health` in a browser. If it responds, reload the wallpaper in Wallpaper Engine; an error page loaded before the companion started may remain visible.
+3. Run **Enable Startup.ps1** from that same installation folder. For a source checkout, run `telemetry/install-startup.ps1`. Re-run this step after moving the folder or installing an update elsewhere.
+4. In Windows **Settings → Apps → Startup**, make sure Quiet System is enabled. Enable Wallpaper Engine's startup option too if you want the wallpaper to appear automatically.
+
+Repeat installation and startup setup on every Windows PC using the wallpaper. A shortcut from another computer may point to a different user or folder. This release supports Windows x64 only; macOS, Linux, and Windows ARM need a compatible companion build and wallpaper host.
+
+If the health URL still refuses the connection, check whether the companion exits, then inspect `%LOCALAPPDATA%\QuietSystem\telemetry.log`. Automatic startup starts the app at sign-in; it does not restart an app that subsequently crashes.
+
 | Problem | Try this |
 | --- | --- |
 | Page will not open | Start the app. Only one copy can run, and port 9876 must be free. If it exits, check `%LOCALAPPDATA%\QuietSystem\telemetry.log`. |
@@ -106,7 +121,7 @@ External services also see your IP address. **Use my location** requests your lo
 | Location detection fails | Search for your city instead. Weather needs internet access. |
 | Missing music or audio | Start playback and check the default Windows output device. |
 | Missing lyrics | The provider may not have a match for that track. |
-| Old interface or strange codes like `[?25h` | Add `?v=0.1.2` to the URL, or `&v=0.1.2` if it already contains `?`. Use a new value for later updates. |
+| Old interface or strange codes like `[?25h` | Add `?v=0.1.3` to the URL, or `&v=0.1.3` if it already contains `?`. Use a new value for later updates. |
 
 ## Development
 
@@ -126,7 +141,7 @@ Builds include the runtime. Add `-FrameworkDependent` for a smaller build that r
 | `npm run test:audio` | Audio analysis and device recovery checks. |
 | `npm run test:storage` | System disk selection checks. |
 | `npm run test:terminal` | Interactive console checks on Windows. |
-| `./tools/package-release.ps1 -Version 0.1.2` | Create a release ZIP and SHA256 checksum in `artifacts/releases/`. |
+| `./tools/package-release.ps1 -Version 0.1.3` | Create a release ZIP and SHA256 checksum in `artifacts/releases/`. |
 
 Use the app's local URL for live commands, media, and audio. Add `-- -- --device-check` to the audio test command to check your current output device.
 
@@ -135,6 +150,7 @@ For browser checks, set `QUIET_PLAYWRIGHT_PATH` to a local `playwright/index.mjs
 ```powershell
 node tools/check-display-layout.mjs
 node tools/check-lyrics-layout.mjs
+node tools/check-playback-controls.mjs
 node tools/check-terminal-appearance.mjs
 ```
 

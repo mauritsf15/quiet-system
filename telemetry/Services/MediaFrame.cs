@@ -3,7 +3,11 @@ namespace QuietSystem.Telemetry.Services;
 public sealed record MediaFrame(string State, string Title, string Artist, string Album,
     string Thumbnail, double? Position, double? Duration, bool Enabled = true,
     string TrackKey = "", string SessionId = "", string SourceAppId = "",
-    string MediaType = "unknown", long CapturedAt = 0, double PlaybackRate = 1);
+    string MediaType = "unknown", long CapturedAt = 0, double PlaybackRate = 1,
+    MediaCapabilities? Capabilities = null, double? SeekMin = null, double? SeekMax = null);
+
+public sealed record MediaCapabilities(bool Play = false, bool Pause = false,
+    bool Previous = false, bool Next = false, bool Seek = false);
 
 public static class MediaTiming
 {

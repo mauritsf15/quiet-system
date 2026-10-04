@@ -44,6 +44,7 @@ builder.Services.AddSingleton<LyricsClient>();
 builder.Services.AddSingleton<LyricsSource>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<LyricsSource>());
 builder.Services.AddSingleton<AudioSource>();
+builder.Services.AddSingleton<AudioMixer>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<AudioSource>());
 
 var app = builder.Build();
@@ -69,6 +70,25 @@ app.MapGet("/wallpaper", () => Directory.Exists(wallpaperRoot)
     ? Results.File(Path.Combine(wallpaperRoot, "index.html"), "text/html")
     : Results.NotFound());
 var commandToken = RandomNumberGenerator.GetHexString(32);
+bool MixerAllowed(HttpContext context) => CommandOriginPolicy.IsControlAllowed(context.Request, commandToken);
+MediaControlEndpoints.MapEndpoints(app, MixerAllowed);
+app.MapGet("/api/audio-mixer", async (HttpContext context, AudioMixer mixer) =>
+{
+    context.Response.Headers.CacheControl = "no-store";
+    if (!MixerAllowed(context)) return Results.StatusCode(403);
+    try { return Results.Json(await mixer.ReadAsync()); }
+    catch { return Results.Json(new { error = "Audio controls unavailable" }, statusCode: 503); }
+});
+app.MapPost("/api/audio-mixer/control", async (HttpContext context, AudioMixer mixer, MixerControl control) =>
+{
+    if (!MixerAllowed(context)) return Results.StatusCode(403);
+    if (string.IsNullOrEmpty(control.DeviceId) || (control.Volume is null && control.Muted is null) ||
+        (control.Volume is float volume && (!float.IsFinite(volume) || volume < 0 || volume > 1)))
+        return Results.BadRequest(new { error = "Invalid volume control" });
+    try { return Results.Json(await mixer.ControlAsync(control)); }
+    catch (KeyNotFoundException error) { return Results.Json(new { error = error.Message }, statusCode: 409); }
+    catch { return Results.Json(new { error = "Could not change volume. Try again." }, statusCode: 503); }
+});
 app.MapGet("/api/session", (HttpContext context) =>
 {
     if (!CommandOriginPolicy.IsLocalHost(context.Request)) return Results.StatusCode(403);

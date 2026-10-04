@@ -59,7 +59,8 @@ try {
     } else { Write-Host '  Skipped. Use Start Quiet System.cmd whenever you are ready.' -ForegroundColor DarkGray }
 
     Write-Step 2 'Choose startup behavior'
-    if (Confirm-Step 'Start automatically when you sign in to Windows?' $false) {
+    Write-Host '  Recommended: the wallpaper needs the companion after every restart.' -ForegroundColor DarkGray
+    if (Confirm-Step 'Start automatically when you sign in to Windows?') {
         & (Join-Path $PSScriptRoot 'Enable Startup.ps1')
     } elseif (Confirm-Step 'Remove this installation from automatic startup?' $false) {
         & (Join-Path $PSScriptRoot 'Disable Startup.ps1')

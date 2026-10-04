@@ -1,4 +1,4 @@
-param([string]$Version = '0.1.2', [string]$OutputRoot = (Join-Path $PSScriptRoot '../artifacts/releases'))
+param([string]$Version = '0.1.3', [string]$OutputRoot = (Join-Path $PSScriptRoot '../artifacts/releases'))
 $ErrorActionPreference = 'Stop'
 if ($Version -notmatch '^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$') { throw 'Use a semantic version, for example 0.1.0.' }
 $repoRoot = Split-Path -Parent $PSScriptRoot

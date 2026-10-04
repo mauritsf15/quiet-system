@@ -1,9 +1,10 @@
-import { duration, uptime } from "../core/format.js";
+import { uptime } from "../core/format.js";
+import { installPlaybackControls } from "../media/playback-controls.js?v=20261004a";
+import { installVolumeMixer } from "../audio/volume-mixer.js?v=20261004a";
 import { installLyrics } from "../media/lyrics-controller.js?v=20261003c";
 import { createSpectrumRenderer } from "../audio/spectrum-renderer.js?v=20261004a";
 
 const el = (id) => document.getElementById(id);
-let lastArtwork = null;
 
 function renderClock(store) {
   const now = new Date();
@@ -28,22 +29,6 @@ function renderState(state) {
   el("media-state").textContent = !media.enabled ? "MEDIA UNAVAILABLE" : playing ? media.state.toUpperCase() : "NO ACTIVE MEDIA";
   el("media-title").textContent = playing ? media.title || "Untitled" : "Nothing playing";
   el("media-artist").textContent = playing ? media.artist || "Unknown artist" : "—";
-  el("media-position").textContent = playing ? duration(media.position) : "--:--";
-  el("media-duration").textContent = playing ? duration(media.duration) : "--:--";
-  el("media-progress-fill").style.width = playing && media.duration > 0 ? `${Math.min(100, Math.max(0, media.position / media.duration * 100))}%` : "0%";
-  const artwork = playing ? media.thumbnail || "" : "";
-  if (artwork !== lastArtwork) {
-    lastArtwork = artwork;
-    const holder = el("album-art");
-    holder.replaceChildren();
-    if (artwork) {
-      const image = document.createElement("img");
-      image.alt = "Album artwork";
-      image.src = artwork;
-      image.onerror = () => holder.replaceChildren(Object.assign(document.createElement("span"), { textContent: "no art" }));
-      holder.appendChild(image);
-    } else holder.appendChild(Object.assign(document.createElement("span"), { textContent: "no art" }));
-  }
 }
 
 function updateAudio(spectrum, levels, available = true) {
@@ -52,6 +37,7 @@ function updateAudio(spectrum, levels, available = true) {
 }
 
 export function installDashboard(store, { localCompanion }) {
+  const disposeMixer = installVolumeMixer({ localCompanion });
   const spectrum = createSpectrumRenderer(el("audio-spectrum"));
   let liveSocket;
   let retryTimer;
@@ -60,6 +46,7 @@ export function installDashboard(store, { localCompanion }) {
   const lyrics = installLyrics(store);
   renderClock(store);
   const unsubscribe = store.subscribe(renderState);
+  const disposePlayback = installPlaybackControls(store, { localCompanion });
 
   function connectLive() {
     if (stopped) return;
@@ -67,7 +54,9 @@ export function installDashboard(store, { localCompanion }) {
     liveSocket.addEventListener("message", (event) => {
       try {
         const packet = JSON.parse(event.data);
-        if (packet.type === "media") store.update((state) => ({ ...state, media: { ...state.media, ...packet.data } }));
+        if (packet.type === "media") store.update((state) => ({ ...state, media: {
+          ...state.media, capabilities: null, seekMin: null, seekMax: null, ...packet.data,
+        } }));
         if (packet.type === "lyrics") lyrics.receive(packet.data);
         if (packet.type === "audio") updateAudio(spectrum, packet.levels || [], packet.available);
       } catch { /* Ignore malformed live packets. */ }
@@ -82,5 +71,5 @@ export function installDashboard(store, { localCompanion }) {
   }
   if (localCompanion) connectLive();
   else updateAudio(spectrum, [], false);
-  return () => { stopped = true; unsubscribe(); lyrics.dispose(); spectrum.dispose(); window.clearInterval(clockTimer); window.clearTimeout(retryTimer); liveSocket?.close(); };
+  return () => { stopped = true; disposePlayback(); disposeMixer(); unsubscribe(); lyrics.dispose(); spectrum.dispose(); window.clearInterval(clockTimer); window.clearTimeout(retryTimer); liveSocket?.close(); };
 }

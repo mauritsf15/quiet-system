@@ -128,6 +128,7 @@ Require(!source.Current.Available, "Video sessions hide lyrics");
 sourceMedia.Set(Track() with { State = "stopped" });
 Require(!LyricsSource.CanLookup(sourceMedia.Current), "Stopped sessions do not trigger lyric lookups");
 await source.StopAsync(CancellationToken.None);
+await MediaControlChecks.RunAsync(Require);
 Console.WriteLine($"{checks} media and lyrics checks passed.");
 
 sealed class FixtureHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond) : HttpMessageHandler

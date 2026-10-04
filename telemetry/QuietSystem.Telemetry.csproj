@@ -8,7 +8,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <AssemblyName>QuietSystem.Telemetry</AssemblyName>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <RootNamespace>QuietSystem.Telemetry</RootNamespace>
     <DefaultItemExcludes>$(DefaultItemExcludes);publish\**;.packages\**;.dotnet-home\**</DefaultItemExcludes>
   </PropertyGroup>

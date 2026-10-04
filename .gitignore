@@ -15,6 +15,8 @@ tests/Audio.Integration/bin/
 tests/Audio.Integration/obj/
 tests/Storage.Integration/bin/
 tests/Storage.Integration/obj/
+tests/Mixer.Integration/bin/
+tests/Mixer.Integration/obj/
 artifacts/
 *.user
 *.suo

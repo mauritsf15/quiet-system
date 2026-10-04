@@ -142,6 +142,7 @@ test("losing the live media connection clears the playing state until fresh medi
     close() { this.dispatchEvent(new Event("close")); }
   }
   globalThis.document = { createElement: () => new Element(), getElementById(id) {
+    if (id === "volume-mixer" || id === "media-controls") return null;
     if (!elements.has(id)) elements.set(id, new Element());
     return elements.get(id);
   } };

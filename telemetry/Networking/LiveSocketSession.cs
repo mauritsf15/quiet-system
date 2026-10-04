@@ -20,7 +20,7 @@ public static class LiveSocketSession
                 var audioPayload = JsonSerializer.SerializeToUtf8Bytes(new { type = "audio", levels = audio.Current, available = audio.Available }, options);
                 await socket.SendAsync(audioPayload, WebSocketMessageType.Text, true, cancellation.Token);
                 var currentMedia = media.Current;
-                if (tick++ % 25 == 0 || currentMedia.TrackKey != lastMedia?.TrackKey || currentMedia.State != lastMedia?.State)
+                if (tick++ % 25 == 0 || !ReferenceEquals(currentMedia, lastMedia))
                 {
                     var mediaPayload = JsonSerializer.SerializeToUtf8Bytes(new { type = "media", data = currentMedia }, options);
                     await socket.SendAsync(mediaPayload, WebSocketMessageType.Text, true, cancellation.Token);

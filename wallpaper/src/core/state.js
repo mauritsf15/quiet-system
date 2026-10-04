@@ -38,6 +38,9 @@ export const initialState = {
     mediaType: "unknown",
     capturedAt: 0,
     playbackRate: 1,
+    capabilities: null,
+    seekMin: null,
+    seekMax: null,
   },
   settings: {
     accentRgb: [112, 190, 255],

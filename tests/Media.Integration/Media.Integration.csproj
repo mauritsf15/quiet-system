@@ -8,6 +8,9 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <Compile Include="../../telemetry/Services/MediaFrame.cs" Link="MediaFrame.cs" />
+    <Compile Include="../../telemetry/Services/MediaControl.cs" Link="MediaControl.cs" />
+    <Compile Include="../../telemetry/Networking/MediaControlEndpoints.cs" Link="MediaControlEndpoints.cs" />
+    <Compile Include="../../telemetry/Networking/CommandOriginPolicy.cs" Link="CommandOriginPolicy.cs" />
     <Compile Include="../../telemetry/Services/MediaSelection.cs" Link="MediaSelection.cs" />
     <Compile Include="../../telemetry/Services/LyricsClient.cs" Link="LyricsClient.cs" />
     <Compile Include="../../telemetry/Services/LyricsSource.cs" Link="LyricsSource.cs" />

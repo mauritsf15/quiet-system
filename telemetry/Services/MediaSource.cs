@@ -10,6 +10,7 @@ public sealed class MediaSource : BackgroundService
 {
     private MediaFrame _current = new("stopped", "", "", "", "", null, null);
     private readonly SemaphoreSlim _wake = new(0, 1);
+    private readonly SemaphoreSlim _sessionGate = new(1, 1);
     private readonly Dictionary<GlobalSystemMediaTransportControlsSession, string> _sessions = new();
     private string? _selectedSessionId;
     private string _artTrackKey = "";
@@ -17,6 +18,34 @@ public sealed class MediaSource : BackgroundService
     private volatile bool _artDirty = true;
     public MediaFrame Current => Volatile.Read(ref _current);
     public event Action? FrameChanged;
+
+    public async Task ControlAsync(MediaControl control, CancellationToken cancellation)
+    {
+        MediaControlExecutor.Validate(control);
+        await _sessionGate.WaitAsync(cancellation);
+        try
+        {
+            var selected = _sessions.FirstOrDefault(pair => pair.Value == _selectedSessionId).Key;
+            if (selected is null || _selectedSessionId != control.SessionId)
+                throw new MediaControlException(409, "The media changed. Try again.");
+            // Re-read metadata before checking the track key: live packets may be out of date.
+            var candidate = new MediaCandidate(control.SessionId, selected.SourceAppUserModelId, State(selected.GetPlaybackInfo()));
+            await CaptureAsync(selected, candidate, cancellation);
+            var timeline = selected.GetTimelineProperties();
+            await MediaControlExecutor.ExecuteAsync(control, Current, timeline.StartTime.Ticks,
+                (action, ticks, token) => action switch
+                {
+                    "play" => selected.TryPlayAsync().AsTask(token),
+                    "pause" => selected.TryPauseAsync().AsTask(token),
+                    "previous" => selected.TrySkipPreviousAsync().AsTask(token),
+                    "next" => selected.TrySkipNextAsync().AsTask(token),
+                    "seek" => selected.TryChangePlaybackPositionAsync(ticks!.Value).AsTask(token),
+                    _ => Task.FromResult(false)
+                }, cancellation);
+            await CaptureAsync(selected, candidate, cancellation);
+        }
+        finally { _sessionGate.Release(); Signal(); }
+    }
 
     private void Signal()
     {
@@ -75,6 +104,7 @@ public sealed class MediaSource : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                await _sessionGate.WaitAsync(stoppingToken);
                 try
                 {
                     if (manager is null)
@@ -114,6 +144,7 @@ public sealed class MediaSource : BackgroundService
                     _selectedSessionId = null;
                     Publish(new("stopped", "", "", "", "", null, null, false));
                 }
+                finally { _sessionGate.Release(); }
                 await _wake.WaitAsync(TimeSpan.FromSeconds(1), stoppingToken);
             }
         }
@@ -148,7 +179,9 @@ public sealed class MediaSource : BackgroundService
             if (_artTrackKey != key || _artDirty)
             {
                 _artDirty = false;
-                try { _artwork = await ReadArtworkAsync(properties.Thumbnail); } catch { _artwork = ""; }
+                try { _artwork = await ReadArtworkAsync(properties.Thumbnail, cancellation); }
+                catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { throw; }
+                catch { _artwork = ""; }
                 _artTrackKey = key;
             }
             // Artwork reads are asynchronous: discard a frame if the song changed meanwhile.
@@ -163,8 +196,15 @@ public sealed class MediaSource : BackgroundService
             var position = MediaTiming.Position(timeline.Position.TotalSeconds, timeline.StartTime.TotalSeconds,
                 total, timeline.LastUpdatedTime, capturedAt, state == "playing", rate);
             var type = properties.PlaybackType?.ToString().ToLowerInvariant() ?? "unknown";
+            var controls = playback.Controls;
+            var seekMin = Math.Max(0, (timeline.MinSeekTime - timeline.StartTime).TotalSeconds);
+            var seekMax = total is double length ? Math.Min(length, (timeline.MaxSeekTime - timeline.StartTime).TotalSeconds) : 0;
+            var canSeek = controls.IsPlaybackPositionEnabled && total is > 0 && seekMax > seekMin;
+            var capabilities = new MediaCapabilities(controls.IsPlayEnabled, controls.IsPauseEnabled,
+                controls.IsPreviousEnabled, controls.IsNextEnabled, canSeek);
             Publish(new(state, title, artist, album, _artwork, position, total, true, key,
-                candidate.SessionId, candidate.SourceAppId, type, capturedAt.ToUnixTimeMilliseconds(), rate));
+                candidate.SessionId, candidate.SourceAppId, type, capturedAt.ToUnixTimeMilliseconds(), rate,
+                capabilities, canSeek ? seekMin : null, canSeek ? seekMax : null));
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { throw; }
         catch
@@ -175,14 +215,14 @@ public sealed class MediaSource : BackgroundService
         }
     }
 
-    private static async Task<string> ReadArtworkAsync(IRandomAccessStreamReference? reference)
+    private static async Task<string> ReadArtworkAsync(IRandomAccessStreamReference? reference, CancellationToken cancellation)
     {
         if (reference is null) return "";
-        using var stream = await reference.OpenReadAsync();
+        using var stream = await reference.OpenReadAsync().AsTask(cancellation);
         if (stream.Size is 0 or > 2_000_000) return "";
         using var reader = new DataReader(stream);
         var size = (uint)stream.Size;
-        await reader.LoadAsync(size);
+        await reader.LoadAsync(size).AsTask(cancellation);
         var bytes = new byte[size];
         reader.ReadBytes(bytes);
         var mime = stream.ContentType;
